@@ -21,7 +21,8 @@ requires Heroku OAuth on all requests.
 There are 4 boolean options you can pass to the middleware:
 
 * `herokai_only`: Automatically redirects non-Heroku accounts to
-  `www.heroku.com`. Default: `false`
+  `www.heroku.com`. Alternatively, pass a valid URL and non-Herokai will
+  be redirected there. Default: `false`
 * `expose_token`: Expose the OAuth token in the session, allowing you to
   make API calls as the user. Default: `false`
 * `expose_email`: Expose the user's email address in the session.
