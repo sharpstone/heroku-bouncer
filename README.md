@@ -54,7 +54,7 @@ appropriate, or `/auth/logout` if you only wish to logout of your app.
 The latter will redirect to `/`, which may result is the user being
 logging in again.
 
-## Conditionally disabling the middleware
+## Conditionally enable the middleware
 
 Don't want to OAuth on every request? Use a middleware to conditionally
 enable this middleware, like
