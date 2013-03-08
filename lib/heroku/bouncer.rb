@@ -40,7 +40,7 @@ class Heroku::Bouncer < Sinatra::Base
   before do
     if session[:user]
       expose_store
-    elsif ! %w[/auth/heroku/callback /auth/heroku /auth/failure].include?(request.path)
+    elsif ! %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout].include?(request.path)
       session[:return_to] = request.url
       redirect to('/auth/heroku')
     end
@@ -65,11 +65,23 @@ class Heroku::Bouncer < Sinatra::Base
     redirect to(session.delete(:return_to) || '/')
   end
 
-  # user decided  not to give us access?
+  # something went wrong
   get '/auth/failure' do
+    session.destroy
+    redirect to("/")
+  end
+
+  # logout, single sign-on style
+  get '/auth/sso-logout' do
     session.destroy
     auth_url = ENV["HEROKU_AUTH_URL"] || "https://api.heroku.com"
     redirect to("#{auth_url}/logout")
+  end
+
+  # logout but only locally
+  get '/auth/logout' do
+    session.destroy
+    redirect to("/")
   end
 
 end

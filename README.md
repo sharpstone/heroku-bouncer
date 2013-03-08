@@ -47,6 +47,13 @@ the following keys to your request environment:
 
 You can access this in your Rack app by reading `request.env[key]`.
 
+## Logging out
+
+Send users to `/auth/sso-logout` if logging out of Heroku is
+appropriate, or `/auth/logout` if you only wish to logout of your app.
+The latter will redirect to `/`, which may result is the user being
+logging in again.
+
 ## Conditionally disabling the middleware
 
 Don't want to OAuth on every request? Use a middleware to conditionally
