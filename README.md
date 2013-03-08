@@ -1,12 +1,19 @@
 # Heroku Bouncer
 
-Heroku Bounder is a Rack middleware (implemented in Sinatra) that
+Heroku Bouncer is a Rack middleware (implemented in Sinatra) that
 requires Heroku OAuth on all requests.
 
 ## Use
 
-1. Set `HEROKU_ID` and `HEROKU_SECRET` in your environment.
-2. Use the middleware:
+1. Create your OAuth client using `/auth/heroku/callback` as your
+   callback endpoint:
+
+    ```sh
+    heroku clients:create likeaboss https://likeaboss.herokuapp.com/auth/heroku/callback
+    ```
+
+2. Set `HEROKU_ID` and `HEROKU_SECRET` in your environment.
+3. Use the middleware:
 
     ```ruby
     require 'heroku/bouncer'
@@ -33,7 +40,7 @@ There are 4 boolean options you can pass to the middleware:
 You use these by passing a hash to the `use` call, for example:
 
 ```ruby
-use Heroku::Builder, expose_token: true
+use Heroku::Bouncer, expose_token: true
 ```
 
 ## How to get the data
