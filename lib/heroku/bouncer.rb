@@ -52,7 +52,7 @@ class Heroku::Bouncer < Sinatra::Base
     token = request.env['omniauth.auth']['credentials']['token']
     store(:token, token) if @expose_token
     if @expose_email || @expose_user || @herokai_only
-      api = Heroku::API.new(api_key: token)
+      api = Heroku::API.new(:api_key => token)
       user = api.get_user.body if @expose_user
       store(:user, user) if @expose_user
       store(:email, user['email']) if @expose_email
