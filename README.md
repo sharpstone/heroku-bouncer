@@ -47,6 +47,15 @@ the following keys to your request environment:
 
 You can access this in your Rack app by reading `request.env[key]`.
 
+## Using the Heroku API
+
+If you set `expose_token` to `true`, you'll get an API token that you
+can use to make Heroku API calls on behalf of the logged-in user using
+[heroku.rb](https://github.com/heroku/heroku.rb).
+
+    heroku = Heroku::API.new(:api_key => request.env["bouncer.token"])
+    apps = heroku.get_apps.body
+
 ## Logging out
 
 Send users to `/auth/sso-logout` if logging out of Heroku is
