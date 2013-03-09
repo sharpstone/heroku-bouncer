@@ -57,7 +57,7 @@ class Heroku::Bouncer < Sinatra::Base
       store(:user, user) if @expose_user
       store(:email, user['email']) if @expose_email
 
-      if @herokai_only && user['email'] !~ /@heroku\.com$/
+      if @herokai_only && !user['email'].end_with?("@heroku.com")
         url = @herokai_only.is_a?(String) ? @herokai_only : 'https://www.heroku.com'
         redirect to(url) and return
       end
