@@ -25,5 +25,6 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency("omniauth-heroku", [">= 0.1.0"])
   s.add_runtime_dependency("sinatra", ["~> 1.0"])
-  s.add_runtime_dependency("heroku-api", [">= 0.0.0"])
+  s.add_runtime_dependency("faraday", ["~> 0.8"])
+  s.add_runtime_dependency("multi_json", ["~> 1.0"])
 end

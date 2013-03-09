@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'omniauth-heroku'
-require 'heroku-api'
+require 'faraday'
+require 'multi_json'
 
 Heroku ||= Module.new
 
@@ -24,6 +25,14 @@ class Heroku::Bouncer < Sinatra::Base
 
   def extract_option(options, option, default = nil)
     options.has_key?(option) ? options[option] : default
+  end
+
+  def fetch_user(token)
+    MultiJson.decode(
+      Faraday.new(ENV["HEROKU_API_URL"] || "https://api.heroku.com/").get('/account') do |r|
+        r.headers['Accept'] = 'application/json'
+        r.headers['Authorization'] = "Bearer #{token}"
+      end.body)
   end
 
   def store(key, value)
@@ -52,8 +61,7 @@ class Heroku::Bouncer < Sinatra::Base
     token = request.env['omniauth.auth']['credentials']['token']
     store(:token, token) if @expose_token
     if @expose_email || @expose_user || @herokai_only
-      api = Heroku::API.new(:api_key => token)
-      user = api.get_user.body if @expose_user
+      user = fetch_user(token)
       store(:user, user) if @expose_user
       store(:email, user['email']) if @expose_email
 
