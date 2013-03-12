@@ -60,8 +60,13 @@ If you set `expose_token` to `true`, you'll get an API token that you
 can use to make Heroku API calls on behalf of the logged-in user using
 [heroku.rb](https://github.com/heroku/heroku.rb).
 
-    heroku = Heroku::API.new(:api_key => request.env["bouncer.token"])
-    apps = heroku.get_apps.body
+```ruby
+heroku = Heroku::API.new(:api_key => request.env["bouncer.token"])
+apps = heroku.get_apps.body
+```
+
+Keep in mind that this adds substantial security risk to your
+application.
 
 ## Logging out
 
