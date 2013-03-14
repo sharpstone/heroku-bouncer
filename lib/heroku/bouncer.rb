@@ -82,7 +82,7 @@ class Heroku::Bouncer < Sinatra::Base
   # logout, single sign-on style
   get '/auth/sso-logout' do
     session.destroy
-    auth_url = ENV["HEROKU_AUTH_URL"] || "https://api.heroku.com"
+    auth_url = ENV["HEROKU_AUTH_URL"] || "https://id.heroku.com"
     redirect to("#{auth_url}/logout")
   end
 
