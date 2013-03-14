@@ -12,7 +12,7 @@ requires Heroku OAuth on all requests.
     heroku clients:create likeaboss https://likeaboss.herokuapp.com/auth/heroku/callback
     ```
 
-2. Set `HEROKU_ID` and `HEROKU_SECRET` in your environment.
+2. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
 3. Use the middleware:
 
     ```ruby
