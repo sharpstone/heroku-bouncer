@@ -79,7 +79,9 @@ logging in again.
 
 Don't want to OAuth on every request? Use a middleware to conditionally
 enable this middleware, like
-[`Rack::Builder`](http://rack.rubyforge.org/doc/Rack/Builder.html).
+[Rack::Builder](http://rack.rubyforge.org/doc/Rack/Builder.html).
+Alternatively, [use inheritance to extend the middleware to act any way
+you like](https://gist.github.com/wuputah/5534428).
 
 ## There be dragons
 
