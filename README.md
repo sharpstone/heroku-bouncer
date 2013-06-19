@@ -13,7 +13,10 @@ requires Heroku OAuth on all requests.
     ```
 
 2. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
-3. Use the middleware:
+3. Optionally, set the `COOKIE_SECRET` environment variable to a long
+   random string. Otherwise, the OAuth ID and secret are concatenated
+   for use as a secret.
+4. Use the middleware:
 
     ```ruby
     require 'heroku/bouncer'
@@ -85,7 +88,5 @@ you like](https://gist.github.com/wuputah/5534428).
 
 ## There be dragons
 
-* This middleware uses a session stored in a cookie. The cookie secret
-  is `HEROKU_ID + HEROKU_SECRET`. So keep these secret.
 * There's no tests yet. You may encounter bugs. Please report them (or
   fix them in a pull request).
