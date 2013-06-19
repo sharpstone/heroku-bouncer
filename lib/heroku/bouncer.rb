@@ -15,7 +15,7 @@ class Heroku::Bouncer < Sinatra::Base
 
   enable :sessions, :raise_errors
   disable :show_exceptions
-  set :session_secret, ID + SECRET
+  set :session_secret, (ENV['COOKIE_SECRET'] || (ID + SECRET)).to_s
 
   # sets up the /auth/heroku endpoint
   unless ID.empty? || SECRET.empty?
