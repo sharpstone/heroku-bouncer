@@ -13,7 +13,8 @@ class Heroku::Bouncer < Sinatra::Base
   ID = (ENV['HEROKU_OAUTH_ID'] || ENV['HEROKU_ID']).to_s
   SECRET = (ENV['HEROKU_OAUTH_SECRET'] ||  ENV['HEROKU_SECRET']).to_s
 
-  enable :sessions
+  enable :sessions, :raise_errors
+  disable :show_exceptions
   set :session_secret, ID + SECRET
 
   # sets up the /auth/heroku endpoint
