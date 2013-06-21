@@ -2,6 +2,7 @@ require 'sinatra/base'
 require 'omniauth-heroku'
 require 'faraday'
 require 'multi_json'
+require 'encrypted_cookie'
 
 Heroku ||= Module.new
 
@@ -13,9 +14,13 @@ class Heroku::Bouncer < Sinatra::Base
   ID = (ENV['HEROKU_OAUTH_ID'] || ENV['HEROKU_ID']).to_s
   SECRET = (ENV['HEROKU_OAUTH_SECRET'] ||  ENV['HEROKU_SECRET']).to_s
 
-  enable :sessions, :raise_errors
+  enable :raise_errors
   disable :show_exceptions
-  set :session_secret, (ENV['COOKIE_SECRET'] || (ID + SECRET)).to_s
+
+  use Rack::Session::EncryptedCookie,
+    :secret => (ENV['COOKIE_SECRET'] || (ID + SECRET)).to_s,
+    :expire_after => 8 * 60 * 60,
+    :key => (ENV['COOKIE_NAME'] || '_bouncer_session').to_s
 
   # sets up the /auth/heroku endpoint
   unless ID.empty? || SECRET.empty?
