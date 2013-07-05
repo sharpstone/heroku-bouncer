@@ -76,24 +76,28 @@ class Heroku::Bouncer < Sinatra::Base
 
   # something went wrong
   get '/auth/failure' do
-    session.destroy
+    destroy_session
     redirect to("/")
   end
 
   # logout, single sign-on style
   get '/auth/sso-logout' do
-    session.destroy
+    destroy_session
     auth_url = ENV["HEROKU_AUTH_URL"] || "https://id.heroku.com"
     redirect to("#{auth_url}/logout")
   end
 
   # logout but only locally
   get '/auth/logout' do
-    session.destroy
+    destroy_session
     redirect to("/")
   end
 
 private
+
+  def destroy_session
+    session = nil if session
+  end
 
   def extract_option(options, option, default = nil)
     options.has_key?(option) ? options[option] : default
