@@ -1,20 +1,22 @@
 # Heroku Bouncer
 
 Heroku Bouncer is a Rack middleware (implemented in Sinatra) that
-requires Heroku OAuth on all requests.
+requires Heroku OAuth on all requests. You can see a working sinatra app that uses [heroku-bouncer here](https://github.com/schneems/heroku-bouncer-demo).
 
 ## Use
 
 1. Create your OAuth client using `/auth/heroku/callback` as your
-   callback endpoint:
+   callback endpoint. You will want to use `http://localhost:5000/auth/heroku/callback` for local testing. Or another url in production:
 
     ```sh
     heroku clients:register likeaboss https://likeaboss.herokuapp.com/auth/heroku/callback
     ```
 
-2. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
-3. Set the `COOKIE_SECRET` environment variable to a long random string.
-   Otherwise, the OAuth ID and secret are concatenated for use as a secret.
+2. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment
+   from the previous step.
+3. Set the `COOKIE_SECRET` environment variable to a long
+   random string. Otherwise, the OAuth ID and secret are concatenated
+   for use as a secret.
 4. Use the middleware:
 
     ```ruby
@@ -29,20 +31,41 @@ requires Heroku OAuth on all requests.
 
 There are 4 boolean options you can pass to the middleware:
 
-* `herokai_only`: Automatically redirects non-Heroku accounts to
-  `www.heroku.com`. Alternatively, pass a valid URL and non-Herokai will
-  be redirected there. Default: `false`
-* `expose_token`: Expose the OAuth token in the session, allowing you to
-  make API calls as the user. Default: `false`
-* `expose_email`: Expose the user's email address in the session.
-  Default: `true`
-* `expose_user`: Expose the user attributes in the session. Default:
-  `true`
+**herokai_only**
 
-You use these by passing a hash to the `use` call, for example:
+Automatically redirects non-Heroku accounts to
+`www.heroku.com`. Alternatively, pass a valid URL and non-Herokai will
+be redirected there. Default: `false`
 
 ```ruby
-use Heroku::Bouncer, expose_token: true
+use Heroku::Bouncer herokai_only: true
+```
+
+**expose_token**
+
+Expose the OAuth token in the session, allowing you to
+make API calls as the user. Default: `false`
+
+```ruby
+use Heroku::Bouncer expose_token: true
+```
+
+**expose_email**
+
+Expose the user's email address in the session.
+Default: `true`
+
+```ruby
+use Heroku::Bouncer expose_email: false
+```
+
+**expose_user**
+
+Expose the user attributes in the session. Default:
+`true`
+
+```ruby
+use Heroku::Bouncer expose_user: false
 ```
 
 ## How to get the data
@@ -50,11 +73,11 @@ use Heroku::Bouncer, expose_token: true
 Based on your choice of the expose options above, the middleware adds
 the following keys to your request environment:
 
-* `bouncer.token`
-* `bouncer.email`
-* `bouncer.user`
-
-You can access this in Sinatra and Rails by reading `request.env[key]`.
+```ruby
+request.env['bouncer.token']
+request.env['bouncer.email']
+request.env['bouncer.user']
+```
 
 ## Using the Heroku API
 
