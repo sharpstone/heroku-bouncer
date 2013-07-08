@@ -9,13 +9,12 @@ requires Heroku OAuth on all requests.
    callback endpoint:
 
     ```sh
-    heroku clients:create likeaboss https://likeaboss.herokuapp.com/auth/heroku/callback
+    heroku clients:register likeaboss https://likeaboss.herokuapp.com/auth/heroku/callback
     ```
 
 2. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
-3. Optionally, set the `COOKIE_SECRET` environment variable to a long
-   random string. Otherwise, the OAuth ID and secret are concatenated
-   for use as a secret.
+3. Set the `COOKIE_SECRET` environment variable to a long random string.
+   Otherwise, the OAuth ID and secret are concatenated for use as a secret.
 4. Use the middleware:
 
     ```ruby
@@ -55,7 +54,7 @@ the following keys to your request environment:
 * `bouncer.email`
 * `bouncer.user`
 
-You can access this in your Rack app by reading `request.env[key]`.
+You can access this in Sinatra and Rails by reading `request.env[key]`.
 
 ## Using the Heroku API
 
