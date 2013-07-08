@@ -3,13 +3,20 @@
 Heroku Bouncer is a Rack middleware (implemented in Sinatra) that
 requires Heroku OAuth on all requests.
 
+## Demo
+
+[heroku-bouncer-demo](https://github.com/schneems/heroku-bouncer-demo) is a
+Sinatra app that uses heroku-bouncer.
+
 ## Use
 
 1. Create your OAuth client using `/auth/heroku/callback` as your
-   callback endpoint:
+   callback endpoint. Use `http://localhost:5000/auth/heroku/callback`
+   for local development with Foreman.
 
     ```sh
-    heroku clients:register likeaboss https://likeaboss.herokuapp.com/auth/heroku/callback
+    heroku clients:register localhost http://localhost:5000/auth/heroku/callback
+    heroku clients:register myapp https://myapp.herokuapp.com/auth/heroku/callback
     ```
 
 2. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
@@ -54,7 +61,8 @@ the following keys to your request environment:
 * `bouncer.email`
 * `bouncer.user`
 
-You can access this in Sinatra and Rails by reading `request.env[key]`.
+You can access this in Sinatra and Rails by  `request.env[key]`, e.g.
+`request.env['bouncer.token']`.
 
 ## Using the Heroku API
 
