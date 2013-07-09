@@ -10,13 +10,13 @@ Sinatra app that uses heroku-bouncer.
 
 ## Use
 
-0. Install the Heroku OAuth plugin.
+1. Install the Heroku OAuth plugin.
 
     ``` sh
     heroku plugins:install git@github.com:heroku/heroku-oauth.git
     ```
 
-1. Create your OAuth client using `/auth/heroku/callback` as your
+2. Create your OAuth client using `/auth/heroku/callback` as your
    callback endpoint. Use `http://localhost:5000/auth/heroku/callback`
    for local development with Foreman.
 
@@ -25,10 +25,10 @@ Sinatra app that uses heroku-bouncer.
     heroku clients:register myapp https://myapp.herokuapp.com/auth/heroku/callback
     ```
 
-2. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
-3. Set the `COOKIE_SECRET` environment variable to a long random string.
+3. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
+4. Set the `COOKIE_SECRET` environment variable to a long random string.
    Otherwise, the OAuth ID and secret are concatenated for use as a secret.
-4. Use the middleware:
+5. Use the middleware:
 
     ```ruby
     require 'heroku/bouncer'
