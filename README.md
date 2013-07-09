@@ -10,6 +10,12 @@ Sinatra app that uses heroku-bouncer.
 
 ## Use
 
+0. Install the Heroku OAuth plugin.
+
+    ``` sh
+    heroku plugins:install git@github.com:heroku/heroku-oauth.git
+    ```
+
 1. Create your OAuth client using `/auth/heroku/callback` as your
    callback endpoint. Use `http://localhost:5000/auth/heroku/callback`
    for local development with Foreman.
