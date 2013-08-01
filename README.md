@@ -24,7 +24,7 @@ Sinatra app that uses heroku-bouncer.
    Otherwise, the OAuth ID and secret are concatenated for use as a secret.
 4. Use the middleware.
 
-    ### Rack, Sinatra, and Rails 4
+    **Rack, Sinatra, and Rails 4**
 
     Add a `use` line to `config.ru`:
 
@@ -38,7 +38,7 @@ Sinatra app that uses heroku-bouncer.
     The middleware does not work properly when configured inside
     Rails 4.
 
-    ### Rails 3
+    **Rails 3**
 
     Add a middleware configuration line to `config/application.rb`:
 
