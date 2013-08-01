@@ -22,14 +22,28 @@ Sinatra app that uses heroku-bouncer.
 2. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
 3. Set the `COOKIE_SECRET` environment variable to a long random string.
    Otherwise, the OAuth ID and secret are concatenated for use as a secret.
-4. Use the middleware:
+4. Use the middleware.
+
+    ### Rack, Sinatra, and Rails 4
+
+    Add a `use` line to `config.ru`:
 
     ```ruby
-    require 'heroku/bouncer'
-    require 'your_app'
+    require ::File.expand_path('../config/environment', __FILE__)
 
-    use Heroku::Bouncer
-    run YourApp
+    use ::Heroku::Bouncer
+    run Rails.application
+    ```
+
+    The middleware does not work properly when configured inside
+    Rails 4.
+
+    ### Rails 3
+
+    Add a middleware configuration line to `config/application.rb`:
+
+    ```ruby
+    config.middleware.use ::Heroku::Bouncer
     ```
 
 ## Options
