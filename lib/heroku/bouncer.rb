@@ -4,7 +4,9 @@ require 'faraday'
 require 'multi_json'
 require 'encrypted_cookie'
 
-Heroku ||= Module.new
+unless defined?(Heroku)
+  module Heroku; end
+end
 
 class Heroku::Bouncer < Sinatra::Base
 
