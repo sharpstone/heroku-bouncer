@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
     "Gemfile.lock",
     "Rakefile",
   ])
+  s.license = 'MIT'
 
   s.add_runtime_dependency("omniauth-heroku", [">= 0.1.0"])
   s.add_runtime_dependency("sinatra", ["~> 1.0"])
