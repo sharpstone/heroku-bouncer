@@ -2,7 +2,7 @@ require 'sinatra/base'
 require 'omniauth-heroku'
 require 'faraday'
 require 'multi_json'
-require 'encrypted_cookie'
+require 'openssl'
 
 unless defined?(Heroku)
   module Heroku; end
@@ -13,16 +13,12 @@ class Heroku::Bouncer < Sinatra::Base
   $stderr.puts "[warn] heroku-bouncer: HEROKU_ID detected, please use HEROKU_OAUTH_ID instead" if ENV.has_key?('HEROKU_ID')
   $stderr.puts "[warn] heroku-bouncer: HEROKU_SECRET detected, please use HEROKU_OAUTH_SECRET instead" if ENV.has_key?('HEROKU_SECRET')
 
-  ID = (ENV['HEROKU_OAUTH_ID'] || ENV['HEROKU_ID']).to_s
-  SECRET = (ENV['HEROKU_OAUTH_SECRET'] ||  ENV['HEROKU_SECRET']).to_s
+  ID            = (ENV['HEROKU_OAUTH_ID'] || ENV['HEROKU_ID']).to_s
+  SECRET        = (ENV['HEROKU_OAUTH_SECRET'] ||  ENV['HEROKU_SECRET']).to_s
+  COOKIE_SECRET = (ENV['COOKIE_SECRET'] || (ID + SECRET)).to_s
 
   enable :raise_errors
   disable :show_exceptions
-
-  use Rack::Session::EncryptedCookie,
-    :secret => (ENV['COOKIE_SECRET'] || (ID + SECRET)).to_s,
-    :expire_after => 8 * 60 * 60,
-    :key => (ENV['COOKIE_NAME'] || '_bouncer_session').to_s
 
   # sets up the /auth/heroku endpoint
   unless ID.empty? || SECRET.empty?
@@ -47,14 +43,21 @@ class Heroku::Bouncer < Sinatra::Base
   end
 
   def call(env)
-    @disabled ? @app.call(env) : super(env)
+    if @disabled
+      @app.call(env)
+    else
+      decrypt_store(env)
+      status, headers, body = super(env)
+      encrypt_store(env)
+      [status, headers, body]
+    end
   end
 
   before do
-    if session[:store] && session[:store][:user]
+    if store_read(:user)
       expose_store
     elsif ! %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout].include?(request.path)
-      session[:return_to] = request.url
+      store_write(:return_to, request.url)
       redirect to('/auth/heroku')
     end
   end
@@ -68,14 +71,14 @@ class Heroku::Bouncer < Sinatra::Base
         url = @herokai_only.is_a?(String) ? @herokai_only : 'https://www.heroku.com'
         redirect to(url) and return
       end
-      @expose_user ? store(:user, user) : store(:user, true)
-      store(:email, user['email']) if @expose_email
+      @expose_user ? store_write(:user, user) : store_write(:user, true)
+      store_write(:email, user['email']) if @expose_email
     else
-      store(:user, true)
+      store_write(:user, true)
     end
 
-    store(:token, token) if @expose_token
-    redirect to(session.delete(:return_to) || '/')
+    store_write(:token, token) if @expose_token
+    redirect to(store_delete(:return_to) || '/')
   end
 
   # something went wrong
@@ -99,8 +102,34 @@ class Heroku::Bouncer < Sinatra::Base
 
 private
 
-  def destroy_session
-    session = nil if session
+  def decrypt_store env
+    session_data = env["rack.session"][:bouncer]
+
+    if session_data
+      if session_data = decrypt(session_data)
+        session_data, digest = session_data.split("--")
+        session_data = nil unless digest == generate_hmac(session_data)
+      end
+    end
+
+    begin
+      session_data = session_data.unpack("m*").first
+      session_data = Marshal.load(session_data)
+      env["rack.session"][:bouncer] = session_data
+    rescue
+      env["rack.session"][:bouncer] = Hash.new
+    end
+
+  end
+
+  def encrypt_store env
+    session_data = Marshal.dump(env["rack.session"][:bouncer])
+    session_data = [session_data].pack("m*")
+
+    session_data = "#{session_data}--#{generate_hmac(session_data)}"
+
+    session_data = encrypt(session_data)
+    env["rack.session"][:bouncer] = session_data
   end
 
   def extract_option(options, option, default = nil)
@@ -115,15 +144,62 @@ private
       end.body)
   end
 
-  def store(key, value)
-    session[:store] ||= {}
-    session[:store][key] = value
+  def store
+    session[:bouncer]
+  end
+
+  def store_write(key, value)
+    store[key] = value
+  end
+
+  def store_read(key)
+    store.fetch(key, nil)
+  end
+
+  def store_delete(key)
+    store.delete(key)
+  end
+
+  def destroy_session
+    session = nil if session
   end
 
   def expose_store
-    session[:store].each_pair do |key, value|
+    store.each_pair do |key, value|
       request.env["bouncer.#{key}"] = value
     end
+  end
+
+  def encrypt(str)
+    aes = OpenSSL::Cipher::Cipher.new('aes-128-cbc').encrypt
+    aes.key = COOKIE_SECRET
+    iv = OpenSSL::Random.random_bytes(aes.iv_len)
+    aes.iv = iv
+    [iv + (aes.update(str) << aes.final)].pack('m0')
+  end
+
+  # decrypts string. returns nil if an error occurs
+  #
+  # returns nil if openssl raises an error during decryption (likely
+  # someone is tampering with the session data, or the sinatra user was
+  # previously using Cookie and has just switched to EncryptedCookie), and
+  # will also return nil if the text to decrypt is too short to possibly be
+  # good aes data.
+  def decrypt(str)
+    str = str.unpack('m0').first
+    aes = OpenSSL::Cipher::Cipher.new('aes-128-cbc').decrypt
+    aes.key = COOKIE_SECRET
+    iv = str[0, aes.iv_len]
+    aes.iv = iv
+    crypted_text = str[aes.iv_len..-1]
+    return nil if crypted_text.nil? || iv.nil?
+    aes.update(crypted_text) << aes.final
+  rescue
+    nil
+  end
+
+  def generate_hmac(data)
+    OpenSSL::HMAC.hexdigest(OpenSSL::Digest::SHA1.new, COOKIE_SECRET, data)
   end
 
 end
