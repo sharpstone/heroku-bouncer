@@ -61,7 +61,6 @@ class Heroku::Bouncer < Sinatra::Base
 
   # callback when successful, time to save data
   get '/auth/heroku/callback' do
-    session[:user] = true
     token = request.env['omniauth.auth']['credentials']['token']
     if @expose_email || @expose_user || @herokai_only
       user = fetch_user(token)
@@ -69,9 +68,12 @@ class Heroku::Bouncer < Sinatra::Base
         url = @herokai_only.is_a?(String) ? @herokai_only : 'https://www.heroku.com'
         redirect to(url) and return
       end
-      store(:user, user) if @expose_user
+      @expose_user ? store(:user, user) : store(:user, true)
       store(:email, user['email']) if @expose_email
+    else
+      store(:user, true)
     end
+
     store(:token, token) if @expose_token
     redirect to(session.delete(:return_to) || '/')
   end
