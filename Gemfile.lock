@@ -1,8 +1,7 @@
 PATH
   remote: .
   specs:
-    heroku-bouncer (0.2.1)
-      encrypted_cookie (~> 0.0.4)
+    heroku-bouncer (0.3.3)
       faraday (~> 0.8)
       multi_json (~> 1.0)
       omniauth-heroku (>= 0.1.0)
@@ -11,14 +10,14 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    encrypted_cookie (0.0.4)
-    faraday (0.8.7)
-      multipart-post (~> 1.1)
+    faraday (0.8.8)
+      multipart-post (~> 1.2.0)
     hashie (2.0.5)
     httpauth (0.2.0)
     jwt (0.1.8)
       multi_json (>= 1.5)
-    multi_json (1.7.7)
+    minitest (5.0.8)
+    multi_json (1.8.0)
     multipart-post (1.2.0)
     oauth2 (0.8.1)
       faraday (~> 0.8)
@@ -49,3 +48,4 @@ PLATFORMS
 
 DEPENDENCIES
   heroku-bouncer!
+  minitest (~> 5.0)
