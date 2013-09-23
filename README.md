@@ -10,7 +10,13 @@ Sinatra app that uses heroku-bouncer.
 
 ## Use
 
-1. Create your OAuth client using `/auth/heroku/callback` as your
+1. Install the Heroku OAuth CLI plugin.
+
+    ```sh
+    heroku plugins:install git://github.com/heroku/heroku-oauth.git
+    ```
+
+2. Create your OAuth client using `/auth/heroku/callback` as your
    callback endpoint. Use `http://localhost:5000/auth/heroku/callback`
    for local development with Foreman.
 
@@ -19,26 +25,43 @@ Sinatra app that uses heroku-bouncer.
     heroku clients:register myapp https://myapp.herokuapp.com/auth/heroku/callback
     ```
 
-2. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
-3. Set the `COOKIE_SECRET` environment variable to a long random string.
+3. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
+4. Set the `COOKIE_SECRET` environment variable to a long random string.
    Otherwise, the OAuth ID and secret are concatenated for use as a secret.
-4. Use the middleware.
+5. Use the middleware as follows:
 
-    **Rack, Sinatra, and Rails 4**
+    **Rack**
 
-    Add a `use` line to `config.ru`:
+    `Heroku::Bouncer` requires a session middleware to be mounted above
+    it. Pure Rack apps will need to add such a middleware if they don't
+    already have one. In `config.ru`:
 
     ```ruby
-    require ::File.expand_path('../config/environment', __FILE__)
+    require 'rack/session/cookie'
+    require 'heroku/bouncer'
+    require 'my_app'
 
-    use ::Heroku::Bouncer
-    run Rails.application
+    # use `openssl rand -base64 32` to generate a secret
+    use Rack::Session::Cookie, secret: "..."
+    use Heroku::Bouncer
+    run MyApp
     ```
 
-    The middleware does not work properly when configured inside
-    Rails 4.
+    **Sinatra**
 
-    **Rails 3**
+    `Heroku::Bouncer` can be run like a Rack app, but since a Sinatra
+    app can mount Rack middleware, it may be easier to mount it inside
+    the app and use Sinatra's session.
+
+    ```ruby
+    class MyApp < Sinatra::Base
+      ...
+      enable :sessions, secret: "..."
+      use ::Heroku::Bouncer
+      ...
+    ```
+
+    **Rails**
 
     Add a middleware configuration line to `config/application.rb`:
 
