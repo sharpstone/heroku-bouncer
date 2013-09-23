@@ -46,11 +46,17 @@ class Heroku::Bouncer < Sinatra::Base
     if @disabled
       @app.call(env)
     else
-      decrypt_store(env)
-      status, headers, body = super(env)
-      encrypt_store(env)
-      [status, headers, body]
+      unlock_session_data(env) do
+        super(env)
+      end
     end
+  end
+
+  def unlock_session_data(env, &block)
+    decrypt_store(env)
+    return_value = yield
+    encrypt_store(env)
+    return_value
   end
 
   before do
@@ -100,36 +106,92 @@ class Heroku::Bouncer < Sinatra::Base
     redirect to("/")
   end
 
-private
+  # Encapsulates encrypting and decrypting a hash of data. Does not store the
+  # key that is passed in.
+  class DecryptedHash < Hash
 
-  def decrypt_store env
-    session_data = env["rack.session"][:bouncer]
+    Lockbox = ::Heroku::Bouncer::Lockbox
 
-    if session_data
-      if session_data = decrypt(session_data)
-        session_data, digest = session_data.split("--")
-        session_data = nil unless digest == generate_hmac(session_data)
+    def initialize(decrypted_hash = nil)
+      super
+      replace(decrypted_hash) if decrypted_hash
+    end
+
+    def self.unlock(data, key)
+      if data && data = Lockbox.new(key).unlock(data)
+        data, digest = data.split("--")
+        if digest == Lockbox.generate_hmac(data, key)
+          data = data.unpack('m*').first
+          data = Marshal.load(data)
+          new(data)
+        else
+          new
+        end
+      else
+        new
       end
     end
 
-    begin
-      session_data = session_data.unpack("m*").first
-      session_data = Marshal.load(session_data)
-      env["rack.session"][:bouncer] = session_data
+    def lock(key)
+      # marshal a Hash, not a DecryptedHash
+      data = {}.replace(self)
+      data = Marshal.dump(data)
+      data = [data].pack('m*')
+      data = "#{data}--#{Lockbox.generate_hmac(data, key)}"
+      Lockbox.new(key).lock(data)
+    end
+
+  private
+
+    def self.generate_hmac(data, key)
+      OpenSSL::HMAC.hexdigest(OpenSSL::Digest::SHA1.new, key, data)
+    end
+  end
+
+  class Lockbox < BasicObject
+
+    def initialize(key)
+      @key = key
+    end
+
+    def lock(str)
+      aes = OpenSSL::Cipher::Cipher.new('aes-128-cbc').encrypt
+      aes.key = @key
+      iv = OpenSSL::Random.random_bytes(aes.iv_len)
+      aes.iv = iv
+      [iv + (aes.update(str) << aes.final)].pack('m0')
+    end
+
+    # decrypts string. returns nil if an error occurs
+    #
+    # returns nil if openssl raises an error during decryption (data
+    # manipulation, key change, implementation change), or if the text to
+    # decrypt is too short to possibly be good aes data.
+    def unlock(str)
+      str = str.unpack('m0').first
+      aes = OpenSSL::Cipher::Cipher.new('aes-128-cbc').decrypt
+      aes.key = @key
+      iv = str[0, aes.iv_len]
+      aes.iv = iv
+      crypted_text = str[aes.iv_len..-1]
+      return nil if crypted_text.nil? || iv.nil?
+      aes.update(crypted_text) << aes.final
     rescue
-      env["rack.session"][:bouncer] = Hash.new
+      nil
     end
 
   end
 
-  def encrypt_store env
-    session_data = Marshal.dump(env["rack.session"][:bouncer])
-    session_data = [session_data].pack("m*")
+private
 
-    session_data = "#{session_data}--#{generate_hmac(session_data)}"
+  def decrypt_store(env)
+    env["rack.session"][:bouncer] =
+      DecryptedHash.unlock(env["rack.session"][:bouncer], COOKIE_SECRET)
+  end
 
-    session_data = encrypt(session_data)
-    env["rack.session"][:bouncer] = session_data
+  def encrypt_store(env)
+    env["rack.session"][:bouncer] =
+      env["rack.session"][:bouncer].lock(COOKIE_SECRET)
   end
 
   def extract_option(options, option, default = nil)
@@ -170,36 +232,5 @@ private
     end
   end
 
-  def encrypt(str)
-    aes = OpenSSL::Cipher::Cipher.new('aes-128-cbc').encrypt
-    aes.key = COOKIE_SECRET
-    iv = OpenSSL::Random.random_bytes(aes.iv_len)
-    aes.iv = iv
-    [iv + (aes.update(str) << aes.final)].pack('m0')
-  end
-
-  # decrypts string. returns nil if an error occurs
-  #
-  # returns nil if openssl raises an error during decryption (likely
-  # someone is tampering with the session data, or the sinatra user was
-  # previously using Cookie and has just switched to EncryptedCookie), and
-  # will also return nil if the text to decrypt is too short to possibly be
-  # good aes data.
-  def decrypt(str)
-    str = str.unpack('m0').first
-    aes = OpenSSL::Cipher::Cipher.new('aes-128-cbc').decrypt
-    aes.key = COOKIE_SECRET
-    iv = str[0, aes.iv_len]
-    aes.iv = iv
-    crypted_text = str[aes.iv_len..-1]
-    return nil if crypted_text.nil? || iv.nil?
-    aes.update(crypted_text) << aes.final
-  rescue
-    nil
-  end
-
-  def generate_hmac(data)
-    OpenSSL::HMAC.hexdigest(OpenSSL::Digest::SHA1.new, COOKIE_SECRET, data)
-  end
 
 end
