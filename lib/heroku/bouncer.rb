@@ -51,7 +51,7 @@ class Heroku::Bouncer < Sinatra::Base
   end
 
   before do
-    if session[:user]
+    if session[:store] && session[:store][:user]
       expose_store
     elsif ! %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout].include?(request.path)
       session[:return_to] = request.url
