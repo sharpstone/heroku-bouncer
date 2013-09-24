@@ -15,6 +15,7 @@ class Heroku::Bouncer < Sinatra::Base
 
   ID = (ENV['HEROKU_OAUTH_ID'] || ENV['HEROKU_ID']).to_s
   SECRET = (ENV['HEROKU_OAUTH_SECRET'] ||  ENV['HEROKU_SECRET']).to_s
+  SCOPE = (ENV['HEROKU_OAUTH_SCOPE'] ||  'identity').to_s
 
   enable :raise_errors
   disable :show_exceptions
@@ -27,7 +28,7 @@ class Heroku::Bouncer < Sinatra::Base
   # sets up the /auth/heroku endpoint
   unless ID.empty? || SECRET.empty?
     use OmniAuth::Builder do
-      provider :heroku, ID, SECRET
+      provider :heroku, ID, SECRET, scope: SCOPE
     end
   end
 
