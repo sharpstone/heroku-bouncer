@@ -66,6 +66,14 @@ You use these by passing a hash to the `use` call, for example:
 use Heroku::Bouncer, expose_token: true
 ```
 
+### Scopes
+
+Heroku OAuth provides a number of different
+[scopes](https://devcenter.heroku.com/articles/oauth#scopes). The default
+scope is "identity". Scopes can be set with the `HEROKU_OAUTH_SCOPE`
+environment variable.
+
+
 ## How to get the data
 
 Based on your choice of the expose options above, the middleware adds
