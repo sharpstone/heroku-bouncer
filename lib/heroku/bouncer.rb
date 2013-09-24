@@ -110,8 +110,6 @@ class Heroku::Bouncer < Sinatra::Base
   # key that is passed in.
   class DecryptedHash < Hash
 
-    Lockbox = ::Heroku::Bouncer::Lockbox
-
     def initialize(decrypted_hash = nil)
       super
       replace(decrypted_hash) if decrypted_hash
@@ -141,11 +139,6 @@ class Heroku::Bouncer < Sinatra::Base
       Lockbox.new(key).lock(data)
     end
 
-  private
-
-    def self.generate_hmac(data, key)
-      OpenSSL::HMAC.hexdigest(OpenSSL::Digest::SHA1.new, key, data)
-    end
   end
 
   class Lockbox < BasicObject
@@ -155,9 +148,9 @@ class Heroku::Bouncer < Sinatra::Base
     end
 
     def lock(str)
-      aes = OpenSSL::Cipher::Cipher.new('aes-128-cbc').encrypt
+      aes = ::OpenSSL::Cipher::Cipher.new('aes-128-cbc').encrypt
       aes.key = @key
-      iv = OpenSSL::Random.random_bytes(aes.iv_len)
+      iv = ::OpenSSL::Random.random_bytes(aes.iv_len)
       aes.iv = iv
       [iv + (aes.update(str) << aes.final)].pack('m0')
     end
@@ -169,7 +162,7 @@ class Heroku::Bouncer < Sinatra::Base
     # decrypt is too short to possibly be good aes data.
     def unlock(str)
       str = str.unpack('m0').first
-      aes = OpenSSL::Cipher::Cipher.new('aes-128-cbc').decrypt
+      aes = ::OpenSSL::Cipher::Cipher.new('aes-128-cbc').decrypt
       aes.key = @key
       iv = str[0, aes.iv_len]
       aes.iv = iv
@@ -180,6 +173,11 @@ class Heroku::Bouncer < Sinatra::Base
       nil
     end
 
+  private
+
+    def self.generate_hmac(data, key)
+      ::OpenSSL::HMAC.hexdigest(::OpenSSL::Digest::SHA1.new, key, data)
+    end
   end
 
 private
