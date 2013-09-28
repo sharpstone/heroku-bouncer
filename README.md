@@ -25,10 +25,7 @@ Sinatra app that uses heroku-bouncer.
     heroku clients:register myapp https://myapp.herokuapp.com/auth/heroku/callback
     ```
 
-3. Set `HEROKU_OAUTH_ID` and `HEROKU_OAUTH_SECRET` in your environment.
-4. Set the `COOKIE_SECRET` environment variable to a long random string.
-   Otherwise, the OAuth ID and secret are concatenated for use as a secret.
-5. Use the middleware as follows:
+3. Configure the middleware as follows:
 
     **Rack**
 
@@ -69,10 +66,29 @@ Sinatra app that uses heroku-bouncer.
     config.middleware.use ::Heroku::Bouncer
     ```
 
-## Options
+4. Add the required options `:oauth` and `:secret` as explained
+   below.
 
-There are 4 boolean options you can pass to the middleware:
+## Settings
 
+Two settings are **required**:
+
+* `oauth`: Your OAuth credentials as a hash - `:id` and `:secret`.
+* `secret`: A random string used as an encryption secret used to secure
+  the user information in the session.
+
+For example:
+
+```ruby
+use Heroku::Bouncer,
+  oauth: { id: "...", secret: "..." },
+  secret: "..."
+```
+
+There are 5 options you can pass to the middleware:
+
+* `oauth[:scope]`: The [OAuth scope][] to use when requesting the OAuth
+  token. Default: `identity`.
 * `herokai_only`: Automatically redirects non-Heroku accounts to
   `www.heroku.com`. Alternatively, pass a valid URL and non-Herokai will
   be redirected there. Default: `false`
@@ -86,7 +102,10 @@ There are 4 boolean options you can pass to the middleware:
 You use these by passing a hash to the `use` call, for example:
 
 ```ruby
-use Heroku::Bouncer, expose_token: true
+use Heroku::Bouncer,
+  oauth: { id: "...", secret: "...", scope: "global" },
+  secret: "...",
+  expose_token: true
 ```
 
 ## How to get the data
@@ -125,12 +144,15 @@ logging in again.
 ## Conditionally enable the middleware
 
 Don't want to OAuth on every request? Use a middleware to conditionally
-enable this middleware, like
-[Rack::Builder](http://rack.rubyforge.org/doc/Rack/Builder.html).
+enable this middleware, like [Rack::Builder][].
 Alternatively, [use inheritance to extend the middleware to act any way
-you like](https://gist.github.com/wuputah/5534428).
+you like][inheritance].
 
 ## There be dragons
 
 * There's no tests yet. You may encounter bugs. Please report them (or
   fix them in a pull request).
+
+[OAuth scope]: https://devcenter.heroku.com/articles/oauth#scopes
+[Rack::Builder]: http://rack.rubyforge.org/doc/Rack/Builder.html
+[inheritance]: https://gist.github.com/wuputah/5534428
