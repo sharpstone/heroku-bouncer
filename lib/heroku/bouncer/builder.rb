@@ -1,4 +1,5 @@
 require 'heroku/bouncer/middleware'
+require 'rack/builder'
 require 'omniauth-heroku'
 
 class Heroku::Bouncer::Builder

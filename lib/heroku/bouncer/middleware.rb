@@ -1,8 +1,8 @@
 require 'sinatra/base'
 require 'faraday'
-require 'multi_json'
 
-require 'bouncer/decrypted_hash'
+require 'heroku/bouncer/json_parser'
+require 'heroku/bouncer/decrypted_hash'
 
 class Heroku::Bouncer::Middleware < Sinatra::Base
 
@@ -96,7 +96,7 @@ private
   end
 
   def fetch_user(token)
-    MultiJson.decode(
+    ::Heroku::Bouncer::JsonParser.call(
       Faraday.new(ENV["HEROKU_API_URL"] || "https://api.heroku.com/").get('/account') do |r|
         r.headers['Accept'] = 'application/json'
         r.headers['Authorization'] = "Bearer #{token}"
