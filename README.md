@@ -40,7 +40,8 @@ Sinatra app that uses heroku-bouncer.
 
     # use `openssl rand -base64 32` to generate a secret
     use Rack::Session::Cookie, secret: "..."
-    use Heroku::Bouncer
+    use Heroku::Bouncer,
+      oauth: { id: "...", secret: "..." }, secret: "..."
     run MyApp
     ```
 
@@ -54,7 +55,8 @@ Sinatra app that uses heroku-bouncer.
     class MyApp < Sinatra::Base
       ...
       enable :sessions, secret: "..."
-      use ::Heroku::Bouncer
+      use ::Heroku::Bouncer,
+        oauth: { id: "...", secret: "..." }, secret: "..."
       ...
     ```
 
@@ -63,10 +65,11 @@ Sinatra app that uses heroku-bouncer.
     Add a middleware configuration line to `config/application.rb`:
 
     ```ruby
-    config.middleware.use ::Heroku::Bouncer
+    config.middleware.use ::Heroku::Bouncer,
+      oauth: { id: "...", secret: "..." }, secret: "..."
     ```
 
-4. Add the required options `:oauth` and `:secret` as explained
+4. Fill in the required settings `:oauth` and `:secret` as explained
    below.
 
 ## Settings
@@ -77,15 +80,15 @@ Two settings are **required**:
 * `secret`: A random string used as an encryption secret used to secure
   the user information in the session.
 
-For example:
+Using environment variables for these is recommended, for example:
 
 ```ruby
 use Heroku::Bouncer,
-  oauth: { id: "...", secret: "..." },
-  secret: "..."
+  oauth: { id: ENV['HEROKU_OAUTH_ID'], secret: ENV['HEROKU_OAUTH_SECRET'] },
+  secret: ENV['HEROKU_BOUNCER_SECRET']
 ```
 
-There are 5 options you can pass to the middleware:
+There are 5 additional options you can pass to the middleware:
 
 * `oauth[:scope]`: The [OAuth scope][] to use when requesting the OAuth
   token. Default: `identity`.
@@ -143,10 +146,13 @@ logging in again.
 
 ## Conditionally enable the middleware
 
-Don't want to OAuth on every request? Use a middleware to conditionally
-enable this middleware, like [Rack::Builder][].
-Alternatively, [use inheritance to extend the middleware to act any way
-you like][inheritance].
+> Don't want to OAuth on every request? Use a middleware to conditionally
+> enable this middleware, like [Rack::Builder][].
+> Alternatively, [use inheritance to extend the middleware to act any way
+> you like][inheritance].
+
+Due to changes in how the middleware stack is built, this is currently
+broken in the 0.4.0 prereleases.
 
 ## There be dragons
 
