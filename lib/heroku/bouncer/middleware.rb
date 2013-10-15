@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'faraday'
+require 'securerandom'
 
 require 'heroku/bouncer/json_parser'
 require 'heroku/bouncer/decrypted_hash'
@@ -18,6 +19,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
       # super is not called; we're not using sinatra if we're disabled
     else
       super(app)
+      @cookie_secret = extract_option(options, :secret, SecureRandom.base64(32))
       @herokai_only = extract_option(options, :herokai_only, false)
       @expose_token = extract_option(options, :expose_token, false)
       @expose_email = extract_option(options, :expose_email, true)
@@ -105,12 +107,12 @@ private
 
   def decrypt_store(env)
     env["rack.session"][:bouncer] =
-      DecryptedHash.unlock(env["rack.session"][:bouncer], COOKIE_SECRET)
+      DecryptedHash.unlock(env["rack.session"][:bouncer], @cookie_secret)
   end
 
   def encrypt_store(env)
     env["rack.session"][:bouncer] =
-      env["rack.session"][:bouncer].lock(COOKIE_SECRET)
+      env["rack.session"][:bouncer].lock(@cookie_secret)
   end
 
   def store

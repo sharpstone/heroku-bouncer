@@ -9,7 +9,7 @@ class Heroku::Bouncer::Builder
     id, secret, scope = extract_options!(options)
     unless id.empty? || secret.empty?
       builder.use OmniAuth::Builder do
-        provider :heroku, id, secret, scope
+        provider :heroku, id, secret, :scope => scope
       end
     end
     builder.run Heroku::Bouncer::Middleware.new(app, options)
@@ -39,11 +39,11 @@ class Heroku::Bouncer::Builder
 
     # we have to do this here because we wont have id+secret later
     if options[:secret].nil?
-      if ENV.has_key('COOKIE_SECRET')
-        $stderr.puts = "[warn] heroku-bouncer: COOKIE_SECRET detected in environment, please pass in :secret instead"
+      if ENV.has_key?('COOKIE_SECRET')
+        $stderr.puts "[warn] heroku-bouncer: COOKIE_SECRET detected in environment, please pass in :secret instead"
         options[:secret] = ENV['COOKIE_SECRET']
       else
-        $stderr.puts = "[warn] heroku-bouncer: :secret is missing, using id + secret"
+        $stderr.puts "[warn] heroku-bouncer: :secret is missing, using id + secret"
         options[:secret] = id.to_s + secret.to_s
       end
     end
