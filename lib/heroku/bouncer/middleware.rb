@@ -44,10 +44,14 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     return_value
   end
 
+  def auth_request?
+    %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout].include?(request.path)
+  end
+
   before do
     if store_read(:user)
       expose_store
-    elsif ! %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout].include?(request.path)
+    elsif !auth_request?
       store_write(:return_to, request.url)
       redirect to('/auth/heroku')
     end
