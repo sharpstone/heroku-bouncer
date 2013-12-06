@@ -88,7 +88,7 @@ use Heroku::Bouncer,
   secret: ENV['HEROKU_BOUNCER_SECRET']
 ```
 
-There are 5 additional options you can pass to the middleware:
+There are 6 additional options you can pass to the middleware:
 
 * `oauth[:scope]`: The [OAuth scope][] to use when requesting the OAuth
   token. Default: `identity`.
@@ -101,6 +101,7 @@ There are 5 additional options you can pass to the middleware:
   Default: `true`
 * `expose_user`: Expose the user attributes in the session. Default:
   `true`
+* `session_sync_nonce`: If present, determines the name of a cookie shared across properties under a same domain in order to keep their sessions synchronized. Default: `nil`
 
 
 You use these by passing a hash to the `use` call, for example:
