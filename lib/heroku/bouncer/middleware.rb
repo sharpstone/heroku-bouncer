@@ -110,7 +110,12 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
   get '/auth/sso-logout' do
     destroy_session
     auth_url = ENV["HEROKU_AUTH_URL"] || "https://id.heroku.com"
-    redirect to("#{auth_url}/logout")
+    logout_url = "#{auth_url}/logout"
+
+    # id.heroku.com whitelists this return_to param, as any auth provider should do
+    logout_url += "?url=#{params['return_to']}" if params['return_to']
+
+    redirect to(logout_url)
   end
 
   # logout but only locally
