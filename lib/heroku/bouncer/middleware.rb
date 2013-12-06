@@ -24,6 +24,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
       @expose_token = extract_option(options, :expose_token, false)
       @expose_email = extract_option(options, :expose_email, true)
       @expose_user = extract_option(options, :expose_user, true)
+      @session_sync_nonce = extract_option(options, :session_sync_nonce, nil)
     end
   end
 
@@ -44,10 +45,32 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     return_value
   end
 
+  def auth_request?
+    %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout].include?(request.path)
+  end
+
+  def session_nonce_mismatch?
+    (store_read(@session_sync_nonce.to_sym).to_s != session_nonce_cookie.to_s) && !auth_request?
+  end
+
+  def session_nonce_cookie
+    @session_sync_nonce && request.cookies[@session_sync_nonce]
+  end
+
   before do
+    if @session_sync_nonce && session_nonce_mismatch?
+      if session_nonce_cookie.to_s.empty?
+        destroy_session
+        redirect to(request.url)
+      else
+        store_write(:return_to, request.url)
+        redirect to('/auth/heroku')
+      end
+    end
+
     if store_read(:user)
       expose_store
-    elsif ! %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout].include?(request.path)
+    elsif !auth_request?
       store_write(:return_to, request.url)
       redirect to('/auth/heroku')
     end
@@ -67,7 +90,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     else
       store_write(:user, true)
     end
-
+    store_write(@session_sync_nonce.to_sym, session_nonce_cookie) if @session_sync_nonce
     store_write(:token, token) if @expose_token
     redirect to(store_delete(:return_to) || '/')
   end
@@ -131,8 +154,13 @@ private
     store.delete(key)
   end
 
+  def store_empty
+    store.keys.each{ |k| store_delete(k) }
+  end
+
   def destroy_session
     session = nil if session
+    store_empty
   end
 
   def expose_store
