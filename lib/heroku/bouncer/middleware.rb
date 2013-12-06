@@ -25,6 +25,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
       @expose_email = extract_option(options, :expose_email, true)
       @expose_user = extract_option(options, :expose_user, true)
       @session_sync_nonce = extract_option(options, :session_sync_nonce, nil)
+      @allow_anonymous = extract_option(options, :allow_anonymous, nil)
     end
   end
 
@@ -57,6 +58,10 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     @session_sync_nonce && request.cookies[@session_sync_nonce]
   end
 
+  def anonymous_request_allowed?
+    auth_request? || (@allow_anonymous && @allow_anonymous.call(request))
+  end
+
   before do
     if @session_sync_nonce && session_nonce_mismatch?
       if session_nonce_cookie.to_s.empty?
@@ -70,7 +75,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
 
     if store_read(:user)
       expose_store
-    elsif !auth_request?
+    elsif !anonymous_request_allowed?
       store_write(:return_to, request.url)
       redirect to('/auth/heroku')
     end

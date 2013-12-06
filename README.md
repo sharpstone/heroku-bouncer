@@ -88,7 +88,7 @@ use Heroku::Bouncer,
   secret: ENV['HEROKU_BOUNCER_SECRET']
 ```
 
-There are 6 additional options you can pass to the middleware:
+There are 7 additional options you can pass to the middleware:
 
 * `oauth[:scope]`: The [OAuth scope][] to use when requesting the OAuth
   token. Default: `identity`.
@@ -102,6 +102,7 @@ There are 6 additional options you can pass to the middleware:
 * `expose_user`: Expose the user attributes in the session. Default:
   `true`
 * `session_sync_nonce`: If present, determines the name of a cookie shared across properties under a same domain in order to keep their sessions synchronized. Default: `nil`
+* `allow_anonymous`: Accepts a lambda that gets called with each request. If the lambda evals to true, the request will not enforce authentication (e.g: `allow_anonymous: lambda { |req| !/\A\/admin/.match(req.fullpath) }` will allow anonymous requests except those with under the `/admin` path). Default: `nil`, which does not allow anonymous access to any URL.
 
 
 You use these by passing a hash to the `use` call, for example:
