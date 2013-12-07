@@ -47,7 +47,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
   end
 
   def auth_request?
-    %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout].include?(request.path)
+    %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout /auth/login].include?(request.path)
   end
 
   def session_nonce_mismatch?
@@ -122,6 +122,12 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
   get '/auth/logout' do
     destroy_session
     redirect to("/")
+  end
+
+  # login, setting the URL to return to
+  get '/auth/login' do
+    store_write(:return_to, params['return_to'])
+    redirect to('/auth/heroku')
   end
 
 private
