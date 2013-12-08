@@ -18,7 +18,6 @@ ENV['HEROKU_OAUTH_SECRET'] = 'b6c6aa58-3219-4642-add9-6d8008b268f6'
 require_relative '../lib/heroku/bouncer'
 
 OmniAuth.config.test_mode = true
-OmniAuth.config.mock_auth[:heroku] = OmniAuth::AuthHash.new(provider: 'heroku', credentials: {token:'12345'})
 
 class MiniTest::Spec
 
@@ -47,14 +46,15 @@ class MiniTest::Spec
     @app
   end
 
-  def follow_successful_oauth!(creds={})
+  def follow_successful_oauth!(fetched_user_info = {})
     # /auth/heroku (OAuth dance starts)
+    OmniAuth.config.mock_auth[:heroku] = OmniAuth::AuthHash.new(provider: 'heroku', credentials: {token:'12345'})
     assert_equal "http://#{app_host}/auth/heroku", last_response.location, "The user didn't trigger the OmniAuth authentication"
     follow_redirect!
 
-    # stub the credentials that will be fetched from Heroku's API with the token returned with the authentication
-    fetched_credentials = default_credentials.merge!(creds)
-    Heroku::Bouncer::Middleware.any_instance.stubs(:fetch_user).returns(fetched_credentials)
+    # stub the user info that will be fetched from Heroku's API with the token returned with the authentication
+    fetched_user_info = default_fetched_user_info.merge!(fetched_user_info)
+    Heroku::Bouncer::Middleware.any_instance.stubs(:fetch_user).returns(fetched_user_info)
 
     # /auth/callback (OAuth dance finishes)
     assert last_response.location.include?('/auth/heroku/callback'), "The authentication didn't trigger the callback"
@@ -62,7 +62,7 @@ class MiniTest::Spec
     follow_redirect!
   end
 
-  def default_credentials
+  def default_fetched_user_info
     { 'email' => 'joe@a.com', 'id' => 'uid_123@heroku.com', 'allow_tracking' => true, 'oauth_token' => '12345' }
   end
 
