@@ -62,12 +62,15 @@ describe Heroku::Bouncer do
     end
 
     context "a SSO-style logout" do
-      before do
+      it "redirects to the authentication endpoint's /logout path" do
         get '/auth/sso-logout'
+        assert_equal "#{ENV['HEROKU_AUTH_URL']}/logout", last_response.location
       end
 
-      it "redirects to the authentication endpoint's /logout path" do
-        assert_equal "#{ENV['HEROKU_AUTH_URL']}/logout", last_response.location
+      it "supports an optional `return_to` param to be used by the authentication endpoint's /logout path" do
+        return_to = 'https://app.heroku.com'
+        get "/auth/sso-logout?return_to=#{return_to}"
+        assert_equal "#{ENV['HEROKU_AUTH_URL']}/logout?url=#{return_to}", last_response.location
       end
     end
 
