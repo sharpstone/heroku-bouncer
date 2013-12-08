@@ -71,4 +71,8 @@ class MiniTest::Spec
     assert_equal path, URI.parse(last_response.location).path, 'Missing redirection to #{path}'
   end
 
+  def assert_requires_authentication
+    assert_equal "http://#{app_host}/auth/heroku", last_response.location, "Authentication expected, wasn't required"
+  end
+
 end
