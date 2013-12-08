@@ -11,10 +11,8 @@ require 'rack/test'
 require 'mocha/setup'
 
 # seed the environment
-ENV['HEROKU_BOUNCER_SECRET'] = 'another-super-secret-ultra-secure-key'
 ENV['HEROKU_AUTH_URL'] = 'https://auth.example.org'
-ENV['HEROKU_OAUTH_ID'] = '46307a2b-0397-4739-b2b7-2f67d1cff597'
-ENV['HEROKU_OAUTH_SECRET'] = 'b6c6aa58-3219-4642-add9-6d8008b268f6'
+
 require_relative '../lib/heroku/bouncer'
 
 OmniAuth.config.test_mode = true
@@ -24,7 +22,8 @@ class MiniTest::Spec
   # Embedding app
 
   def app_with_bouncer(&bouncer_config_block)
-    bouncer_config = bouncer_config_block.call
+    bouncer_config = default_bouncer_config
+    bouncer_config.merge!(bouncer_config_block.call) if bouncer_config_block
     Sinatra.new do
       use Rack::Session::Cookie, domain: MiniTest::Spec.app_host, secret: 'guess-me'
       use Heroku::Bouncer, bouncer_config
@@ -32,6 +31,13 @@ class MiniTest::Spec
         params['whatever'] || 'root'
       end
     end
+  end
+
+  def default_bouncer_config
+    {
+      oauth: { id: '46307a2b-0397-4739-b2b7-2f67d1cff597', secret: '46307a2b-0397-4739-b2b7-2f67d1cff597' },
+      secret: 'bouncer-super-secret-ultra-secure-key'
+    }
   end
 
   def self.app_host
