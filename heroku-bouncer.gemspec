@@ -29,5 +29,9 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency("faraday", ["~> 0.8"])
   s.add_runtime_dependency("rack", ["~> 1.0"])
 
+  s.add_development_dependency("rake")
   s.add_development_dependency("minitest", "~> 5.0")
+  s.add_development_dependency("minitest-spec-context")
+  s.add_development_dependency("rack-test")
+  s.add_development_dependency("mocha")
 end
