@@ -1,12 +1,12 @@
 Gem::Specification.new do |s|
   s.name = %q{heroku-bouncer}
-  s.version = "0.4.0.pre2"
+  s.version = "0.4.0.pre3"
 
   s.authors = ["Jonathan Dance"]
   s.email = ["jd@heroku.com"]
   s.homepage = "https://github.com/heroku/heroku-bouncer"
   s.description = "ID please."
-  s.summary = "Requires Heroku OAuth on all requests."
+  s.summary = "Rapidly add Heroku OAuth to your Ruby app."
   s.extra_rdoc_files = [
     "README.md"
   ]
