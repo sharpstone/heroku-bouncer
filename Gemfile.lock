@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    heroku-bouncer (0.4.0.pre2)
+    heroku-bouncer (0.4.0.pre3)
       faraday (~> 0.8)
       omniauth-heroku (>= 0.1.0)
       rack (~> 1.0)
@@ -12,12 +12,12 @@ GEM
   specs:
     faraday (0.8.8)
       multipart-post (~> 1.2.0)
-    hashie (1.2.0)
+    hashie (2.0.5)
     httpauth (0.2.0)
     jwt (0.1.8)
       multi_json (>= 1.5)
     metaclass (0.0.1)
-    minitest (5.0.8)
+    minitest (5.1.0)
     minitest-spec-context (0.0.3)
     mocha (0.14.0)
       metaclass (~> 0.0.1)
@@ -39,7 +39,7 @@ GEM
       oauth2 (~> 0.8.0)
       omniauth (~> 1.0)
     rack (1.5.2)
-    rack-protection (1.5.0)
+    rack-protection (1.5.1)
       rack
     rack-test (0.6.2)
       rack (>= 1.0)
