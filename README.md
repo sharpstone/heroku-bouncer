@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/heroku/heroku-bouncer.png)](https://travis-ci.org/heroku/heroku-bouncer)
+
 # Heroku Bouncer
 
 Heroku Bouncer is a Rack middleware (implemented in Sinatra) that
