@@ -170,13 +170,8 @@ private
     store.delete(key)
   end
 
-  def store_empty
-    store.keys.each{ |k| store_delete(k) }
-  end
-
   def destroy_session
-    session = nil if session
-    store_empty
+    store.keys.each { |k| store_delete(k) }
   end
 
   def expose_store
