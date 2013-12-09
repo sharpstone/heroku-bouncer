@@ -160,8 +160,7 @@ broken in the 0.4.0 prereleases.
 
 ## There be dragons
 
-There's no tests yet. You may encounter bugs. Please report them (or fix
-them in a pull request).
+You may encounter bugs. Please report them (or fix them in a pull request).
 
 ## Security Model: A Tale of Three Secrets
 
