@@ -39,45 +39,24 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     end
   end
 
-  def unlock_session_data(env, &block)
-    decrypt_store(env)
-    yield
-  ensure
-    encrypt_store(env)
-  end
-
-  def auth_request?
-    %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout /auth/login].include?(request.path)
-  end
-
-  def session_nonce_mismatch?
-    (store_read(@session_sync_nonce.to_sym).to_s != session_nonce_cookie.to_s) && !auth_request?
-  end
-
-  def session_nonce_cookie
-    @session_sync_nonce && request.cookies[@session_sync_nonce]
-  end
-
-  def anonymous_request_allowed?
-    auth_request? || (@allow_anonymous && @allow_anonymous.call(request))
-  end
-
   before do
-    if @session_sync_nonce && session_nonce_mismatch?
-      if session_nonce_cookie.to_s.empty?
+    if session_nonce_mismatch?
+      if @session_sync_nonce && session_nonce_cookie.to_s.empty?
         destroy_session
         redirect to(request.url)
       else
-        store_write(:return_to, request.url)
-        redirect to('/auth/heroku')
+        require_authentication
       end
     end
 
     if store_read(:user)
-      expose_store
+      if expired?
+        require_authentication
+      else
+        expose_store
+      end
     elsif !anonymous_request_allowed?
-      store_write(:return_to, request.url)
-      redirect to('/auth/heroku')
+      require_authentication
     end
   end
 
@@ -97,6 +76,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     end
     store_write(@session_sync_nonce.to_sym, session_nonce_cookie) if @session_sync_nonce
     store_write(:token, token) if @expose_token
+    store_write(:expires_at, Time.now.to_i + 3600 * 8)
     redirect to(store_delete(:return_to) || '/')
   end
 
@@ -131,6 +111,39 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
   end
 
 private
+
+  def unlock_session_data(env, &block)
+    decrypt_store(env)
+    yield
+  ensure
+    encrypt_store(env)
+  end
+
+  def auth_request?
+    %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout /auth/login].include?(request.path)
+  end
+
+  def session_nonce_mismatch?
+    @session_sync_nonce && (store_read(@session_sync_nonce.to_sym).to_s != session_nonce_cookie.to_s) && !auth_request?
+  end
+
+  def session_nonce_cookie
+    @session_sync_nonce && request.cookies[@session_sync_nonce]
+  end
+
+  def anonymous_request_allowed?
+    auth_request? || (@allow_anonymous && @allow_anonymous.call(request))
+  end
+
+  def expired?
+    ts = store_read(:expires_at)
+    ts.nil? || Time.now.to_i > ts
+  end
+
+  def require_authentication
+    store_write(:return_to, request.url)
+    redirect to('/auth/heroku')
+  end
 
   def extract_option(options, option, default = nil)
     options.has_key?(option) ? options[option] : default
