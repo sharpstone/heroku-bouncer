@@ -41,9 +41,9 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
 
   def unlock_session_data(env, &block)
     decrypt_store(env)
-    return_value = yield
+    yield
+  ensure
     encrypt_store(env)
-    return_value
   end
 
   def auth_request?
