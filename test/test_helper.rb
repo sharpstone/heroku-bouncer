@@ -9,6 +9,7 @@ require 'minitest/spec'
 require 'minitest-spec-context'
 require 'rack/test'
 require 'mocha/setup'
+require 'delorean'
 
 # seed the environment
 ENV['HEROKU_AUTH_URL'] = 'https://auth.example.org'
