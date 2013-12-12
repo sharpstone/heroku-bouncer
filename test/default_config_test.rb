@@ -9,6 +9,10 @@ describe Heroku::Bouncer do
       @app = app_with_bouncer
     end
 
+    after do
+      Delorean.back_to_the_present
+    end
+
     context "on any request not related with authentication" do
       it "requires authentication via /auth/heroku, which gets managed by omniauth-heroku" do
         get '/hi'
@@ -29,6 +33,25 @@ describe Heroku::Bouncer do
           assert_equal %w{ allow_tracking email id oauth_token}, last_request.env['bouncer.user'].keys.sort
           assert last_request.env['bouncer.email']
           assert last_request.env['bouncer.token'].nil?
+          assert_equal 'hi', last_response.body
+        end
+
+        it "requires a new authentication when the session expires" do
+          assert_redirected_to_path('/hi')
+          follow_redirect!
+          assert_equal 'hi', last_response.body
+
+          # session expires
+          Delorean.time_travel_to '1 year from now'
+
+          # requires authentication
+          get '/hi'
+          assert 302, last_response.status
+          assert_equal "http://#{app_host}/auth/heroku", last_response.location
+
+          follow_successful_oauth!
+          assert_redirected_to_path('/hi')
+          follow_redirect!
           assert_equal 'hi', last_response.body
         end
       end

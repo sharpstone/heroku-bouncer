@@ -50,7 +50,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     end
 
     if store_read(:user)
-      if expired?
+      if expired? && !auth_request?
         require_authentication
       else
         expose_store
