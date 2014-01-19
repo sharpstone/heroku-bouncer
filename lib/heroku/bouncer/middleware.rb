@@ -26,11 +26,12 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
       @expose_user = extract_option(options, :expose_user, true)
       @session_sync_nonce = extract_option(options, :session_sync_nonce, nil)
       @allow_anonymous = extract_option(options, :allow_anonymous, nil)
+      @skip = extract_option(options, :skip, false)
     end
   end
 
   def call(env)
-    if @disabled
+    if @disabled || skip?(env)
       @app.call(env)
     else
       unlock_session_data(env) do
@@ -138,6 +139,10 @@ private
   def expired?
     ts = store_read(:expires_at)
     ts.nil? || Time.now.to_i > ts
+  end
+
+  def skip?(env)
+    @skip && @skip.call(env)
   end
 
   def require_authentication
