@@ -13,7 +13,6 @@ Gem::Specification.new do |s|
   s.files = Dir.glob("{lib,spec}/**/*").concat([
     "README.md",
     "Gemfile",
-    "Gemfile.lock",
     "Rakefile",
   ])
   s.require_paths = ["lib"]
