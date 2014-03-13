@@ -6,7 +6,7 @@ class Heroku::Bouncer::Builder
 
   def self.new(app, options = {})
     builder = Rack::Builder.new
-    id, secret, scope = extract_options!(options)
+    id, secret, scope = test? ? setup_test : extract_options!(options)
     unless id.empty? || secret.empty?
       builder.use OmniAuth::Builder do
         provider :heroku, id, secret, :scope => scope
@@ -49,5 +49,17 @@ class Heroku::Bouncer::Builder
     end
 
     [id, secret, scope]
+
+  end
+
+  private
+
+  def self.setup_test
+    id, secret, scope = "test_string", "test_string", "test_string"
+    return id, secret, scope
+  end
+
+  def self.test?
+    ENV.has_key?("RACK_ENV") && ENV["RACK_ENV"].to_s == 'test'
   end
 end
