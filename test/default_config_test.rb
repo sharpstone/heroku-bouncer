@@ -58,14 +58,23 @@ describe Heroku::Bouncer do
     end
 
     context "a login call via /auth/login with a 'return_to' param" do
-      before do
-        @return_to = 'http://google.com'
-        get '/auth/login', 'return_to' => @return_to
+
+      context "when 'return_to' belongs to the same host" do
+        it "redirects to /auth/heroku and after a successful authentication comes back to the given 'return_to'" do
+          @return_to = 'http://example.org/foo'
+          get '/auth/login', 'return_to' => @return_to
+          follow_successful_oauth!
+          assert_equal @return_to, last_response.location
+        end
       end
 
-      it "redirects to /auth/heroku and after a successful authentication comes back to the given 'return_to'" do
-        follow_successful_oauth!
-        assert_equal @return_to, last_response.location
+      context "when 'return_to' does not belong to the same host" do
+        it "'return_to' gets ignored and the user gets redirected to the root path" do
+          @return_to = 'http://google.com/foo'
+          get '/auth/login', 'return_to' => @return_to
+          follow_successful_oauth!
+          assert_equal 'http://example.org/foo', last_response.location
+        end
       end
     end
 
