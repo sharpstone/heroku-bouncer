@@ -78,7 +78,9 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     store_write(@session_sync_nonce.to_sym, session_nonce_cookie) if @session_sync_nonce
     store_write(:token, token) if @expose_token
     store_write(:expires_at, Time.now.to_i + 3600 * 8)
-    redirect to(store_delete(:return_to) || '/')
+
+    return_to = store_delete(:return_to) || '/'
+    redirect to(enforce_host(request.host, return_to))
   end
 
   # something went wrong
@@ -196,6 +198,13 @@ private
     store.each_pair do |key, value|
       request.env["bouncer.#{key}"] = value
     end
+  end
+
+  # Prevent open redirect vulnerabilities by setting the current host
+  def enforce_host(host, url)
+    return_to = URI.parse(url) rescue '/'
+    return_to.host = request.host
+    return_to.to_s
   end
 
 end
