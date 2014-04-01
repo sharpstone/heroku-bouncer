@@ -157,6 +157,9 @@ private
   end
 
   def fetch_user(token)
+    silence_warnings do
+      OpenSSL::SSL.const_set(:VERIFY_PEER, OpenSSL::SSL::VERIFY_NONE) if ENV.has_key?("HEROKU_API_SSL_VERIFY_NONE")
+    end
     ::Heroku::Bouncer::JsonParser.call(
       Faraday.new(ENV["HEROKU_API_URL"] || "https://api.heroku.com/").get('/account') do |r|
         r.headers['Accept'] = 'application/json'
@@ -207,4 +210,11 @@ private
     return_to.to_s
   end
 
+  def silence_warnings(&block)
+    warn_level = $VERBOSE
+    $VERBOSE = nil
+    result = block.call
+    $VERBOSE = warn_level
+    result
+  end
 end
