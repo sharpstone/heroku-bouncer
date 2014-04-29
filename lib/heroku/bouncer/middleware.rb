@@ -109,7 +109,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
 
   # login, setting the URL to return to
   get '/auth/login' do
-    if params['return_to'].length <= 255
+    if params['return_to'] && params['return_to'].length <= 255
       store_write(:return_to, params['return_to'])
     end
     redirect to('/auth/heroku')

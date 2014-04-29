@@ -85,6 +85,14 @@ describe Heroku::Bouncer do
           assert_equal 'http://example.org/', last_response.location
         end
       end
+
+      context "when there is no 'return_to'" do
+        it "redirects to the root path" do
+          get '/auth/login'
+          follow_successful_oauth!
+          assert_equal 'http://example.org/', last_response.location
+        end
+      end
     end
 
     context "a failed OAuth dance" do
