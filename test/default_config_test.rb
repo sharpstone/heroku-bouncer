@@ -76,6 +76,23 @@ describe Heroku::Bouncer do
           assert_equal 'http://example.org/foo', last_response.location
         end
       end
+
+      context "when 'return_to' has more than 255 characters" do
+        it "'return_to' gets ignored and the user gets redirected to the root path" do
+          @return_to = 'http://example.org/' + ('f' * 255)
+          get '/auth/login', 'return_to' => @return_to
+          follow_successful_oauth!
+          assert_equal 'http://example.org/', last_response.location
+        end
+      end
+
+      context "when there is no 'return_to'" do
+        it "redirects to the root path" do
+          get '/auth/login'
+          follow_successful_oauth!
+          assert_equal 'http://example.org/', last_response.location
+        end
+      end
     end
 
     context "a failed OAuth dance" do

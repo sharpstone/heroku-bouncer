@@ -80,7 +80,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     store_write(:expires_at, Time.now.to_i + 3600 * 8)
 
     return_to = store_delete(:return_to) || '/'
-    redirect to(enforce_host(request.host, return_to))
+    redirect to(enforce_host(request.scheme, request.host, return_to))
   end
 
   # something went wrong
@@ -109,7 +109,9 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
 
   # login, setting the URL to return to
   get '/auth/login' do
-    store_write(:return_to, params['return_to'])
+    if params['return_to'] && params['return_to'].length <= 255
+      store_write(:return_to, params['return_to'])
+    end
     redirect to('/auth/heroku')
   end
 
@@ -201,9 +203,10 @@ private
   end
 
   # Prevent open redirect vulnerabilities by setting the current host
-  def enforce_host(host, url)
+  def enforce_host(scheme, host, url)
     return_to = URI.parse(url) rescue '/'
-    return_to.host = request.host
+    return_to.scheme = scheme
+    return_to.host = host
     return_to.to_s
   end
 
