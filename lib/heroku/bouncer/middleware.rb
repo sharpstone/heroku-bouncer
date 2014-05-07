@@ -172,8 +172,10 @@ private
   end
 
   def encrypt_store(env)
-    env["rack.session"][:bouncer] =
-      env["rack.session"][:bouncer].lock(@cookie_secret)
+    if env["rack.session"].key?(:bouncer)
+      env["rack.session"][:bouncer] =
+        env["rack.session"][:bouncer].lock(@cookie_secret)
+    end
   end
 
   def store
