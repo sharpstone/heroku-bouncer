@@ -17,10 +17,10 @@ class Heroku::Bouncer::Builder
   end
 
   def self.extract_options!(options)
-    oauth = options.delete(:oauth) || {}
-    id = oauth.delete(:id)
-    secret = oauth.delete(:secret)
-    scope = oauth.delete(:scope) || 'identity'
+    oauth = options[:oauth] || {}
+    id = oauth[:id]
+    secret = oauth[:secret]
+    scope = oauth[:scope] || 'identity'
 
     if id.nil? && (ENV.has_key?('HEROKU_ID') || ENV.has_key?('HEROKU_OAUTH_ID'))
       $stderr.puts "[warn] heroku-bouncer: HEROKU_ID or HEROKU_OAUTH_ID detected in environment, please pass in :oauth hash instead"
