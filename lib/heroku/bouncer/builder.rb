@@ -7,7 +7,7 @@ class Heroku::Bouncer::Builder
   def self.new(app, options = {})
     builder = Rack::Builder.new
     id, secret, scope = extract_options!(options)
-    unless id.empty? || secret.empty?
+    unless options[:disabled]
       builder.use OmniAuth::Builder do
         provider :heroku, id, secret, :scope => scope
       end
@@ -32,8 +32,8 @@ class Heroku::Bouncer::Builder
       secret = ENV['HEROKU_OAUTH_SECRET'] || ENV['HEROKU_SECRET']
     end
 
-    if id.nil? || secret.nil?
-      $stderr.puts "[fatal] heroku-bouncer: HEROKU_OAUTH_ID or HEROKU_OAUTH_SECRET not set, middleware disabled"
+    if id.nil? || secret.nil? || id.empty? || secret.empty?
+      $stderr.puts "[fatal] heroku-bouncer: OAuth ID or secret not set, middleware disabled"
       options[:disabled] = true
     end
 
