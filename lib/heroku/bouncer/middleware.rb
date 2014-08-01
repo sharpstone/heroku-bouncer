@@ -155,7 +155,7 @@ private
   end
 
   def extract_option(options, option, default = nil)
-    options.has_key?(option) ? options[option] : default
+    options.fetch(option, default)
   end
 
   def fetch_user(token)
