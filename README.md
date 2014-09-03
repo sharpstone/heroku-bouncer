@@ -97,7 +97,10 @@ There are 8 additional options you can pass to the middleware:
 * `herokai_only`: Automatically redirects non-Heroku accounts to
   `www.heroku.com`. Alternatively, pass a valid URL and non-Herokai will
   be redirected there. Default: `false`
-* `redirect_url`: Where unauthorized users are rediercted to.
+* `redirect_url`: Where unauthorized users are rediercted to. Defaults to
+  heroku.com.
+* `allow_if`: A lambda that takes an email address. If the lambda evaluates to
+  true, allow the user through. If false, redirects to `redirect_url`.
 * `expose_token`: Expose the OAuth token in the session, allowing you to
   make API calls as the user. Default: `false`
 * `expose_email`: Expose the user's email address in the session.

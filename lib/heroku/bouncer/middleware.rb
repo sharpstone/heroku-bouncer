@@ -20,17 +20,23 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     else
       super(app)
       @cookie_secret = extract_option(options, :secret, SecureRandom.base64(32))
-      @herokai_only = extract_option(options, :herokai_only, false)
+      herokai_only = extract_option(options, :herokai_only, false)
       # For backwards-compatibilty: The redirect URL can be passed as a value
       # to `herokai_only`
-      if @herokai_only && @herokai_only.is_a?(String)
-        @redirect_url = @herokai_only
-        @herokai_only = true
+      if herokai_only && herokai_only.is_a?(String)
+        @redirect_url = herokai_only
+        herokai_only = true
       else
         @redirect_url = extract_option(options,
                                        :redirect_url,
                                        'https://www.heroku.com')
       end
+      if herokai_only
+        @allow_if = lambda { |email| email.end_with?("@heroku.com") }
+      else
+        @allow_if = extract_option(options, :allow_if, nil)
+      end
+
       @expose_token = extract_option(options, :expose_token, false)
       @expose_email = extract_option(options, :expose_email, true)
       @expose_user = extract_option(options, :expose_user, true)
@@ -74,9 +80,10 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
   # callback when successful, time to save data
   get '/auth/heroku/callback' do
     token = request.env['omniauth.auth']['credentials']['token']
-    if @expose_email || @expose_user || @herokai_only
+    if @expose_email || @expose_user || !@allow_if.nil?
       user = fetch_user(token)
-      if @herokai_only && !user['email'].end_with?("@heroku.com")
+      # Wrapping lambda to prevent short-circut proc return
+      if @allow_if.respond_to?(:call) && !lambda{ @allow_if.call(user['email'])}.call
         redirect to(@redirect_url) and return
       end
       @expose_user ? store_write(:user, user) : store_write(:user, true)
