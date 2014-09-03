@@ -38,6 +38,42 @@ describe Heroku::Bouncer do
     end
   end
 
+  context "herokai_only uses redirect_url" do
+    before do
+      @app = app_with_bouncer do
+        {
+          herokai_only: true,
+          redirect_url: 'https://whoopsie.heroku.com'
+        }
+      end
+    end
+
+    context "after a successful OAuth dance returning a Herokai" do
+      before do
+        get '/hi'
+        follow_successful_oauth!({'email' => 'joe@heroku.com'})
+      end
+
+      it "gives access to the app" do
+        assert_redirected_to_path('/hi')
+        follow_redirect!
+
+        assert_equal 'hi', last_response.body
+      end
+    end
+
+    context "after a successful OAuth dance returning a non-Herokai" do
+      before do
+        get '/hi'
+        follow_successful_oauth!({'email' => 'root@nic.ca'})
+      end
+
+      it "redirects to the given URL" do
+        assert_equal 'https://whoopsie.heroku.com', last_response.location
+      end
+    end
+  end
+
   context "herokai_only: <URL>" do
     before do
       @app = app_with_bouncer do
@@ -72,6 +108,8 @@ describe Heroku::Bouncer do
       end
     end
   end
+
+
 
   context "herokai_only: false" do
     before do

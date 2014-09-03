@@ -21,6 +21,16 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
       super(app)
       @cookie_secret = extract_option(options, :secret, SecureRandom.base64(32))
       @herokai_only = extract_option(options, :herokai_only, false)
+      # For backwards-compatibilty: The redirect URL can be passed as a value
+      # to `herokai_only`
+      if @herokai_only && @herokai_only.is_a?(String)
+        @redirect_url = @herokai_only
+        @herokai_only = true
+      else
+        @redirect_url = extract_option(options,
+                                       :redirect_url,
+                                       'https://www.heroku.com')
+      end
       @expose_token = extract_option(options, :expose_token, false)
       @expose_email = extract_option(options, :expose_email, true)
       @expose_user = extract_option(options, :expose_user, true)
@@ -67,8 +77,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     if @expose_email || @expose_user || @herokai_only
       user = fetch_user(token)
       if @herokai_only && !user['email'].end_with?("@heroku.com")
-        url = @herokai_only.is_a?(String) ? @herokai_only : 'https://www.heroku.com'
-        redirect to(url) and return
+        redirect to(@redirect_url) and return
       end
       @expose_user ? store_write(:user, user) : store_write(:user, true)
       store_write(:email, user['email']) if @expose_email
