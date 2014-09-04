@@ -8,7 +8,8 @@ Gem::Specification.new do |s|
   s.description = "ID please."
   s.summary = "Rapidly add Heroku OAuth to your Ruby app."
   s.extra_rdoc_files = [
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ]
   s.files = Dir.glob("{lib,spec}/**/*").concat([
     "README.md",
