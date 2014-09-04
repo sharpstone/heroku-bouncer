@@ -20,7 +20,20 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     else
       super(app)
       @cookie_secret = extract_option(options, :secret, SecureRandom.base64(32))
-      @herokai_only = extract_option(options, :herokai_only, false)
+      @allow_if = extract_option(options, :allow_if, nil)
+      @redirect_url = extract_option(options, :redirect_url, 'https://www.heroku.com')
+
+      # backwards-compatibilty for `herokai_only`:
+      #  * check email for ending with `@heroku.com`
+      #  * The redirect URL can be passed as a string value to `herokai_only`
+      herokai_only = extract_deprecated_option("please use `allow_if` instead", options, :herokai_only, false)
+      if herokai_only
+        if herokai_only.is_a?(String) && !options[:redirect_url]
+          @redirect_url = herokai_only
+        end
+        @allow_if ||= lambda { |email| email.end_with?("@heroku.com") }
+      end
+
       @expose_token = extract_option(options, :expose_token, false)
       @expose_email = extract_option(options, :expose_email, true)
       @expose_user = extract_option(options, :expose_user, true)
@@ -64,11 +77,11 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
   # callback when successful, time to save data
   get '/auth/heroku/callback' do
     token = request.env['omniauth.auth']['credentials']['token']
-    if @expose_email || @expose_user || @herokai_only
+    if @expose_email || @expose_user || !@allow_if.nil?
       user = fetch_user(token)
-      if @herokai_only && !user['email'].end_with?("@heroku.com")
-        url = @herokai_only.is_a?(String) ? @herokai_only : 'https://www.heroku.com'
-        redirect to(url) and return
+      # Wrapping lambda to prevent short-circut proc return
+      if @allow_if.respond_to?(:call) && !lambda{ @allow_if.call(user['email'])}.call
+        redirect to(@redirect_url) and return
       end
       @expose_user ? store_write(:user, user) : store_write(:user, true)
       store_write(:email, user['email']) if @expose_email
@@ -156,6 +169,11 @@ private
 
   def extract_option(options, option, default = nil)
     options.fetch(option, default)
+  end
+
+  def extract_deprecated_option(warning, options, option, default = nil)
+    $stderr.puts "[warn] heroku-bouncer: `#{option}` option is deprecated: #{warning}"
+    extract_option(options, option, default)
   end
 
   def fetch_user(token)

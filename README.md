@@ -90,22 +90,35 @@ use Heroku::Bouncer,
   secret: ENV['HEROKU_BOUNCER_SECRET']
 ```
 
-There are 8 additional options you can pass to the middleware:
+Here are the supported options you can pass to the middleware:
 
 * `oauth[:scope]`: The [OAuth scope][] to use when requesting the OAuth
   token. Default: `identity`.
-* `herokai_only`: Automatically redirects non-Heroku accounts to
-  `www.heroku.com`. Alternatively, pass a valid URL and non-Herokai will
-  be redirected there. Default: `false`
+* `allow_if`: A lambda that takes an email address. If the lambda evaluates to
+  true, allow the user through. If false, redirects to `redirect_url`.
+  By default, all users are allowed through after authenticating.
+* `redirect_url`: Where unauthorized users are redirected to. Defaults to
+  `www.heroku.com`.
 * `expose_token`: Expose the OAuth token in the session, allowing you to
   make API calls as the user. Default: `false`
 * `expose_email`: Expose the user's email address in the session.
   Default: `true`
 * `expose_user`: Expose the user attributes in the session. Default:
   `true`
-* `session_sync_nonce`: If present, determines the name of a cookie shared across properties under a same domain in order to keep their sessions synchronized. Default: `nil`
-* `allow_anonymous`: Accepts a lambda that gets called with each request. If the lambda evals to true, the request will not enforce authentication (e.g: `allow_anonymous: lambda { |req| !/\A\/admin/.match(req.fullpath) }` will allow anonymous requests except those with under the `/admin` path). Default: `nil`, which does not allow anonymous access to any URL.
-* `skip`: Accepts a lambda that gets called with each request's `env`. If the lambda gets evaluated to true, heroku-bouncer's middleware will be completely skipped. Default: 'false', which applies heroku-bouncer to all requests.
+* `session_sync_nonce`: If present, determines the name of a cookie
+  shared across properties under a same domain in order to keep their
+  sessions synchronized. Default: `nil`
+* `allow_anonymous`: Accepts a lambda that gets called with each
+  request. If the lambda evals to true, the request will not enforce
+  authentication (e.g:
+  `allow_anonymous: lambda { |req| !/\A\/admin/.match(req.fullpath) }`
+  will allow anonymous requests except those with under the `/admin`
+  path). Default: `nil`, which does not allow anonymous access to any
+  URL.
+* `skip`: Accepts a lambda that gets called with each request's `env`.
+  If the lambda gets evaluated to true, heroku-bouncer's middleware will
+  be completely skipped. Default: 'false', which applies heroku-bouncer
+  to all requests.
 
 You use these by passing a hash to the `use` call, for example:
 
@@ -157,8 +170,8 @@ logging in again.
 > Alternatively, [use inheritance to extend the middleware to act any way
 > you like][inheritance].
 
-Due to changes in how the middleware stack is built, this is currently
-broken in the 0.4.0 prereleases.
+Due to changes in how the middleware stack is built, this is not trivial
+in the 0.4.x releases.
 
 ## Security Model: A Tale of Three Secrets
 
