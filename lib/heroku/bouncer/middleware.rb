@@ -20,21 +20,18 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     else
       super(app)
       @cookie_secret = extract_option(options, :secret, SecureRandom.base64(32))
-      herokai_only = extract_option(options, :herokai_only, false)
-      # For backwards-compatibilty: The redirect URL can be passed as a value
-      # to `herokai_only`
-      if herokai_only && herokai_only.is_a?(String)
-        @redirect_url = herokai_only
-        herokai_only = true
-      else
-        @redirect_url = extract_option(options,
-                                       :redirect_url,
-                                       'https://www.heroku.com')
-      end
+      @allow_if = extract_option(options, :allow_if, nil)
+      @redirect_url = extract_option(options, :redirect_url, 'https://www.heroku.com')
+
+      # backwards-compatibilty for `herokai_only`:
+      #  * check email for ending with `@heroku.com`
+      #  * The redirect URL can be passed as a string value to `herokai_only`
+      herokai_only = extract_deprecated_option("please use `allow_if` instead", options, :herokai_only, false)
       if herokai_only
-        @allow_if = lambda { |email| email.end_with?("@heroku.com") }
-      else
-        @allow_if = extract_option(options, :allow_if, nil)
+        if herokai_only.is_a?(String) && !options[:redirect_url]
+          @redirect_url = herokai_only
+        end
+        @allow_if ||= lambda { |email| email.end_with?("@heroku.com") }
       end
 
       @expose_token = extract_option(options, :expose_token, false)
@@ -172,6 +169,11 @@ private
 
   def extract_option(options, option, default = nil)
     options.fetch(option, default)
+  end
+
+  def extract_deprecated_option(warning, options, option, default = nil)
+    $stderr.puts "[warn] heroku-bouncer: `#{option}` option is deprecated: #{warning}"
+    extract_option(options, option, default)
   end
 
   def fetch_user(token)
