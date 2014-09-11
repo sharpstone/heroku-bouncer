@@ -1,4 +1,4 @@
-# 0.6.0.dev
+# 0.6.0.pre
 
 Update omniauth-heroku to 0.2.0.pre.
 
