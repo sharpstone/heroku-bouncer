@@ -172,7 +172,7 @@ private
   end
 
   def extract_deprecated_option(warning, options, option, default = nil)
-    $stderr.puts "[warn] heroku-bouncer: `#{option}` option is deprecated: #{warning}"
+    $stderr.puts "[warn] heroku-bouncer: `#{option}` option is deprecated: #{warning}" if options.has_key?(option)
     extract_option(options, option, default)
   end
 
