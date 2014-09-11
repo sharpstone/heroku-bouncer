@@ -1,3 +1,8 @@
+# 0.5.1
+
+Fixed a bug where I forgot to check to see if a deprecated option was
+used before emitting a warning (#36).
+
 # 0.5.0
 
 Adds `allow_if` option, and deprecates `herokai_only` (#35). Thanks
