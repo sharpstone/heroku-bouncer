@@ -1,3 +1,7 @@
+# 0.6.0.pre
+
+Update omniauth-heroku to 0.2.0.pre.
+
 # 0.5.1
 
 Fixed a bug where I forgot to check to see if a deprecated option was
