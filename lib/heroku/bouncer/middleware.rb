@@ -93,7 +93,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     store_write(:expires_at, Time.now.to_i + 3600 * 8)
 
     return_to = store_delete(:return_to) || '/'
-    redirect to(enforce_host(request.scheme, request.host, return_to))
+    redirect to(enforce_host(request.scheme, request.host, request.port, return_to))
   end
 
   # something went wrong
@@ -223,10 +223,11 @@ private
   end
 
   # Prevent open redirect vulnerabilities by setting the current host
-  def enforce_host(scheme, host, url)
+  def enforce_host(scheme, host, port, url)
     return_to = URI.parse(url) rescue '/'
     return_to.scheme = scheme
     return_to.host = host
+    return_to.port = port unless port == 80
     return_to.to_s
   end
 
