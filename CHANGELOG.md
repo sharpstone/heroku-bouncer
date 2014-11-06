@@ -1,3 +1,8 @@
+# 0.6.0
+
+Bumped dependency on omniauth-heroku, which uses newer versions of of
+omniauth and omniauth-oauth2.
+
 # 0.5.1
 
 Fixed a bug where I forgot to check to see if a deprecated option was
