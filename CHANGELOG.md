@@ -1,3 +1,9 @@
+# 0.5.2
+
+* #40: fixes redirects to non-standard ports (other than 80/443). Thanks
+  @damthieu!
+* Fixed warnings when gem is built due to open-ended dependencies.
+
 # 0.5.1
 
 Fixed a bug where I forgot to check to see if a deprecated option was
