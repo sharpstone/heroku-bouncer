@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/heroku/heroku-bouncer.png)](https://travis-ci.org/heroku/heroku-bouncer)
+[![Dependency Status](https://gemnasium.com/heroku/heroku-bouncer.png)](https://gemnasium.com/heroku/heroku-bouncer)
 
 # Heroku Bouncer
 
