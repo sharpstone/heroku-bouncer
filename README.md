@@ -42,7 +42,7 @@ Sinatra app that uses heroku-bouncer.
     require 'my_app'
 
     # use `openssl rand -base64 32` to generate a secret
-    use Rack::Session::Cookie, secret: "..."
+    use Rack::Session::Cookie, secret: "...", key: "my_app_session"
     use Heroku::Bouncer,
       oauth: { id: "...", secret: "..." }, secret: "..."
     run MyApp
@@ -57,7 +57,7 @@ Sinatra app that uses heroku-bouncer.
     ```ruby
     class MyApp < Sinatra::Base
       ...
-      enable :sessions, secret: "..."
+      enable :sessions, secret: "...", key: "my_app_session"
       use ::Heroku::Bouncer,
         oauth: { id: "...", secret: "..." }, secret: "..."
       ...
