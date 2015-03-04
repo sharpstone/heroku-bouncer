@@ -138,7 +138,7 @@ private
   end
 
   def auth_request?
-    %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout /auth/login].include?(request.path)
+    %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout /auth/login].include?(request.path_info)
   end
 
   def session_nonce_mismatch?
