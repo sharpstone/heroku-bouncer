@@ -1,5 +1,7 @@
 language: ruby
 rvm:
+  - 2.2.0
+  - 2.1.0
   - 2.0.0
   - 1.9.3
   - jruby-19mode
@@ -8,6 +10,3 @@ branches:
     - master
 notifications:
   email: false
-matrix:
-  allow_failures:
-    - rvm: jruby-19mode
