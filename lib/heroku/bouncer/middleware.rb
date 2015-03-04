@@ -20,18 +20,24 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     else
       super(app)
       @cookie_secret = extract_option(options, :secret, SecureRandom.base64(32))
-      @allow_if = extract_option(options, :allow_if, nil)
+      @allow_if_user = extract_option(options, :allow_if_user, nil)
       @redirect_url = extract_option(options, :redirect_url, 'https://www.heroku.com')
 
       # backwards-compatibilty for `herokai_only`:
       #  * check email for ending with `@heroku.com`
       #  * The redirect URL can be passed as a string value to `herokai_only`
-      herokai_only = extract_deprecated_option("please use `allow_if` instead", options, :herokai_only, false)
+      herokai_only = extract_deprecated_option("please use `allow_if_user` instead", options, :herokai_only, false)
       if herokai_only
         if herokai_only.is_a?(String) && !options[:redirect_url]
           @redirect_url = herokai_only
         end
-        @allow_if ||= lambda { |email| email.end_with?("@heroku.com") }
+        @allow_if_user ||= lambda { |user| user['email'].end_with?("@heroku.com") }
+      end
+
+      # backwards-compatibility for allow_if
+      allow_if = extract_option(options, :allow_if, false)
+      if allow_if
+        @allow_if_user ||= lambda { |user| allow_if.call(user['email']) }  
       end
 
       @expose_token = extract_option(options, :expose_token, false)
@@ -77,11 +83,13 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
   # callback when successful, time to save data
   get '/auth/heroku/callback' do
     token = request.env['omniauth.auth']['credentials']['token']
-    if @expose_email || @expose_user || !@allow_if.nil?
+    if @expose_email || @expose_user || !@allow_if_user.nil?
       user = fetch_user(token)
       # Wrapping lambda to prevent short-circut proc return
-      if @allow_if.respond_to?(:call) && !lambda{ @allow_if.call(user['email'])}.call
-        redirect to(@redirect_url) and return
+      if @allow_if_user.respond_to?(:call)
+        if !lambda{ @allow_if_user.call(user)}.call
+          redirect to(@redirect_url) and return
+        end
       end
       @expose_user ? store_write(:user, user) : store_write(:user, true)
       store_write(:email, user['email']) if @expose_email

@@ -98,6 +98,11 @@ Here are the supported options you can pass to the middleware:
 * `allow_if`: A lambda that takes an email address. If the lambda evaluates to
   true, allow the user through. If false, redirects to `redirect_url`.
   By default, all users are allowed through after authenticating.
+* `allow_if_user`: A lambda that takes the 
+  [account resource](https://devcenter.heroku.com/articles/platform-api-reference#account) 
+  representing the user. If the lambda evaluates to true, allow the user
+  through. If false, redirects to `redirect_url`. By default, all users are
+  allowed through after authenticating.
 * `redirect_url`: Where unauthorized users are redirected to. Defaults to
   `www.heroku.com`.
 * `expose_token`: Expose the OAuth token in the session, allowing you to
