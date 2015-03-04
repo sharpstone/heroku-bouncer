@@ -1,3 +1,8 @@
+# tl;dr
+
+PRs welcome. Please write tests, add an entry to CHANGELOG.md for your
+change, and if the change is user-facing, update README.md.
+
 # Contributing
 
 Contributions welcome! Here are some ways you can help:

@@ -1,3 +1,10 @@
+# 0.6.0
+
+* #42: add `allow_if_user` which takes the user object, instead of just
+  an email. Thanks @jacobian!
+* #43: allow bouncer to be installed at sub-paths of the app by using
+  `request.path_info`. Thanks @dpiddy!
+
 # 0.5.2
 
 * #40: fixes redirects to non-standard ports (other than 80/443). Thanks
