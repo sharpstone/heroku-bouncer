@@ -3,11 +3,11 @@ require_relative "test_helper"
 describe Heroku::Bouncer do
   include Rack::Test::Methods
 
-  context "allow_if block" do
+  context "allow_if_user block" do
     before do
       @app = app_with_bouncer do
         {
-          allow_if: lambda { |email| email.end_with? "@initech.com" }
+          allow_if_user: lambda { |user| user['email'].end_with? "@initech.com" }
         }
       end
     end
@@ -42,7 +42,7 @@ describe Heroku::Bouncer do
     before do
       @app = app_with_bouncer do
         {
-          allow_if: lambda { |email| email.end_with? "@initech.com" },
+          allow_if_user: lambda { |user| user['email'].end_with? "@initech.com" },
           redirect_url: 'https://whoopsie.heroku.com'
         }
       end
@@ -101,38 +101,4 @@ describe Heroku::Bouncer do
     end
   end
 
-  context "allow_if_user block" do
-    before do
-      @app = app_with_bouncer do
-        {
-          allow_if_user: lambda { |user| user['email'].end_with? "@initech.com" }
-        }
-      end
-    end
-
-    context "after a successful OAuth dance returning an allowed email" do
-      before do
-        get '/hi'
-        follow_successful_oauth!({'email' => 'milton@initech.com'})
-      end
-
-      it "gives access to the app" do
-        assert_redirected_to_path('/hi')
-        follow_redirect!
-
-        assert_equal 'hi', last_response.body
-      end
-    end
-
-    context "after a successful OAuth dance  with an invalid email" do
-      before do
-        get '/hi'
-        follow_successful_oauth!({'email' => 'joe@a.com'})
-      end
-
-      it "redirects to 'https://www.heroku.com'" do
-        assert_equal 'https://www.heroku.com', last_response.location
-      end
-    end
-  end
 end

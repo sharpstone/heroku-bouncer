@@ -22,16 +22,6 @@ class Heroku::Bouncer::Builder
     secret = oauth[:secret]
     scope = oauth[:scope] || 'identity'
 
-    if id.nil? && (ENV.has_key?('HEROKU_ID') || ENV.has_key?('HEROKU_OAUTH_ID'))
-      $stderr.puts "[warn] heroku-bouncer: HEROKU_ID or HEROKU_OAUTH_ID detected in environment, please pass in :oauth hash instead"
-      id = ENV['HEROKU_OAUTH_ID'] || ENV['HEROKU_ID']
-    end
-
-    if secret.nil? && (ENV.has_key?('HEROKU_SECRET') || ENV.has_key?('HEROKU_OAUTH_SECRET'))
-      $stderr.puts "[warn] heroku-bouncer: HEROKU_SECRET or HEROKU_OAUTH_SECRET detected in environment, please pass in :oauth hash instead"
-      secret = ENV['HEROKU_OAUTH_SECRET'] || ENV['HEROKU_SECRET']
-    end
-
     if id.nil? || secret.nil? || id.empty? || secret.empty?
       $stderr.puts "[fatal] heroku-bouncer: OAuth ID or secret not set, middleware disabled"
       options[:disabled] = true
@@ -39,12 +29,14 @@ class Heroku::Bouncer::Builder
 
     # we have to do this here because we wont have id+secret later
     if options[:secret].nil?
-      if ENV.has_key?('COOKIE_SECRET')
-        $stderr.puts "[warn] heroku-bouncer: COOKIE_SECRET detected in environment, please pass in :secret instead"
-        options[:secret] = ENV['COOKIE_SECRET']
-      else
-        $stderr.puts "[warn] heroku-bouncer: :secret is missing, using id + secret"
-        options[:secret] = id.to_s + secret.to_s
+      $stderr.puts "[warn] heroku-bouncer: :secret is missing, using oauth id + secret as secret"
+      options[:secret] = id.to_s + secret.to_s
+    end
+
+    unless options[:disabled]
+      [:herokai_only, :allow_if].each do |option|
+        $stderr.puts "[fatal] heroku-bouncer: #{option} is no longer supported. For safety, the middleware is disabled. Use `allow_if_user` instead."
+        options[:disabled] = true
       end
     end
 
