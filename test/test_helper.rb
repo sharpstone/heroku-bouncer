@@ -55,7 +55,7 @@ class MiniTest::Spec
 
   def follow_successful_oauth!(fetched_user_info = {})
     # /auth/heroku (OAuth dance starts)
-    OmniAuth.config.mock_auth[:heroku] = OmniAuth::AuthHash.new(provider: 'heroku', credentials: {token:'12345'})
+    OmniAuth.config.mock_auth[:heroku] = OmniAuth::AuthHash.new(provider: 'heroku', credentials: {token:'12345', refresh_token:'67890'})
     assert_equal "http://#{app_host}/auth/heroku", last_response.location, "The user didn't trigger the OmniAuth authentication"
     follow_redirect!
 

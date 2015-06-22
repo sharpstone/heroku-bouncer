@@ -23,6 +23,7 @@ describe Heroku::Bouncer do
         follow_redirect!
 
         assert last_request.env['bouncer.token']
+        assert last_request.env['bouncer.refresh_token']
         assert_equal 'hi', last_response.body
       end
     end
@@ -48,6 +49,7 @@ describe Heroku::Bouncer do
         follow_redirect!
 
         assert last_request.env['bouncer.token'].nil?
+        assert last_request.env['bouncer.refresh_token'].nil?
         assert_equal 'hi', last_response.body
       end
     end

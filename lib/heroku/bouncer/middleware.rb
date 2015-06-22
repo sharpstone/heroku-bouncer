@@ -82,7 +82,8 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
 
   # callback when successful, time to save data
   get '/auth/heroku/callback' do
-    token = request.env['omniauth.auth']['credentials']['token']
+    token         = request.env['omniauth.auth']['credentials']['token']
+    refresh_token = request.env['omniauth.auth']['credentials']['refresh_token']
     if @expose_email || @expose_user || !@allow_if_user.nil?
       user = fetch_user(token)
       # Wrapping lambda to prevent short-circut proc return
@@ -97,7 +98,10 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
       store_write(:user, true)
     end
     store_write(@session_sync_nonce.to_sym, session_nonce_cookie) if @session_sync_nonce
-    store_write(:token, token) if @expose_token
+    if @expose_token
+      store_write(:token, token)
+      store_write(:refresh_token, refresh_token)
+    end
     store_write(:expires_at, Time.now.to_i + 3600 * 8)
 
     return_to = store_delete(:return_to) || '/'
