@@ -142,6 +142,7 @@ Based on your choice of the expose options above, the middleware adds
 the following keys to your request environment:
 
 * `bouncer.token`
+* `bouncer.refresh_token`
 * `bouncer.email`
 * `bouncer.user`
 
@@ -161,6 +162,12 @@ apps = heroku.get_apps.body
 
 Keep in mind that this adds substantial security risk to your
 application.
+
+The API token is short-lived, and expires 8 hours after issue. Heroku provides
+a separate `refresh_token` (available as `bouncer.refresh_token`) that can be
+used to fetch fresh API tokens if necessary. See the
+[token refresh documentation](https://devcenter.heroku.com/articles/oauth#token-refresh)
+for details.
 
 ## Logging out
 
