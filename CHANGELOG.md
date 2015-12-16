@@ -1,3 +1,8 @@
+# 0.7.0
+
+* #46: expose refresh token when exposing access token
+* #44: use v3 API for /account call
+
 # 0.6.0
 
 * #42: add `allow_if_user` which takes the user object, instead of just
