@@ -37,7 +37,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
       # backwards-compatibility for allow_if
       allow_if = extract_option(options, :allow_if, false)
       if allow_if
-        @allow_if_user ||= lambda { |user| allow_if.call(user['email']) }  
+        @allow_if_user ||= lambda { |user| allow_if.call(user['email']) }
       end
 
       @expose_token = extract_option(options, :expose_token, false)
@@ -191,7 +191,7 @@ private
   def fetch_user(token)
     ::Heroku::Bouncer::JsonParser.call(
       Faraday.new(ENV["HEROKU_API_URL"] || "https://api.heroku.com/").get('/account') do |r|
-        r.headers['Accept'] = 'application/json'
+        r.headers['Accept'] = 'application/vnd.heroku+json; version=3'
         r.headers['Authorization'] = "Bearer #{token}"
       end.body)
   end
