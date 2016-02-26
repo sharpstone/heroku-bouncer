@@ -207,6 +207,8 @@ private
     else
       raise UnableToFetchUserError
     end
+  rescue Faraday::ClientError
+    raise UnableToFetchUserError
   end
 
   def decrypt_store(env)
