@@ -194,7 +194,7 @@ private
   end
 
   def fetch_user(token, retries = 3)
-    response = Faraday.new(ENV["HEROKU_API_URL"] || "https://api.heroku.com/").get('/account') do |r|
+    response = ::Faraday.new(ENV["HEROKU_API_URL"] || "https://api.heroku.com/").get('/account') do |r|
       r.headers['Accept'] = 'application/vnd.heroku+json; version=3'
       r.headers['Authorization'] = "Bearer #{token}"
     end
@@ -207,7 +207,7 @@ private
     else
       raise UnableToFetchUserError
     end
-  rescue Faraday::ClientError
+  rescue ::Faraday::ClientError, ::Heroku::Bouncer::JsonParserError
     raise UnableToFetchUserError
   end
 
