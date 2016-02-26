@@ -8,6 +8,7 @@ require 'heroku/bouncer/decrypted_hash'
 class Heroku::Bouncer::Middleware < Sinatra::Base
 
   DecryptedHash = ::Heroku::Bouncer::DecryptedHash
+  UnableToFetchUserError = Class.new(RuntimeError)
 
   enable :raise_errors
   disable :show_exceptions
@@ -82,30 +83,34 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
 
   # callback when successful, time to save data
   get '/auth/heroku/callback' do
-    token         = request.env['omniauth.auth']['credentials']['token']
-    refresh_token = request.env['omniauth.auth']['credentials']['refresh_token']
-    if @expose_email || @expose_user || !@allow_if_user.nil?
-      user = fetch_user(token)
-      # Wrapping lambda to prevent short-circut proc return
-      if @allow_if_user.respond_to?(:call)
-        if !lambda{ @allow_if_user.call(user)}.call
-          redirect to(@redirect_url) and return
+    begin
+      token         = request.env['omniauth.auth']['credentials']['token']
+      refresh_token = request.env['omniauth.auth']['credentials']['refresh_token']
+      if @expose_email || @expose_user || !@allow_if_user.nil?
+        user = fetch_user(token)
+        # Wrapping lambda to prevent short-circut proc return
+        if @allow_if_user.respond_to?(:call)
+          if !lambda{ @allow_if_user.call(user)}.call
+            redirect to(@redirect_url) and return
+          end
         end
+        @expose_user ? store_write(:user, user) : store_write(:user, true)
+        store_write(:email, user['email']) if @expose_email
+      else
+        store_write(:user, true)
       end
-      @expose_user ? store_write(:user, user) : store_write(:user, true)
-      store_write(:email, user['email']) if @expose_email
-    else
-      store_write(:user, true)
-    end
-    store_write(@session_sync_nonce.to_sym, session_nonce_cookie) if @session_sync_nonce
-    if @expose_token
-      store_write(:token, token)
-      store_write(:refresh_token, refresh_token)
-    end
-    store_write(:expires_at, Time.now.to_i + 3600 * 8)
+      store_write(@session_sync_nonce.to_sym, session_nonce_cookie) if @session_sync_nonce
+      if @expose_token
+        store_write(:token, token)
+        store_write(:refresh_token, refresh_token)
+      end
+      store_write(:expires_at, Time.now.to_i + 3600 * 8)
 
-    return_to = store_delete(:return_to) || '/'
-    redirect to(enforce_host(request.scheme, request.host, request.port, return_to))
+      return_to = store_delete(:return_to) || '/'
+      redirect to(enforce_host(request.scheme, request.host, request.port, return_to))
+    rescue UnableToFetchUserError
+      redirect to('/auth/failure')
+    end
   end
 
   # something went wrong
@@ -188,12 +193,20 @@ private
     extract_option(options, option, default)
   end
 
-  def fetch_user(token)
-    ::Heroku::Bouncer::JsonParser.call(
-      Faraday.new(ENV["HEROKU_API_URL"] || "https://api.heroku.com/").get('/account') do |r|
-        r.headers['Accept'] = 'application/vnd.heroku+json; version=3'
-        r.headers['Authorization'] = "Bearer #{token}"
-      end.body)
+  def fetch_user(token, retries = 3)
+    response = Faraday.new(ENV["HEROKU_API_URL"] || "https://api.heroku.com/").get('/account') do |r|
+      r.headers['Accept'] = 'application/vnd.heroku+json; version=3'
+      r.headers['Authorization'] = "Bearer #{token}"
+    end
+
+    if response.status == 200
+      ::Heroku::Bouncer::JsonParser.call(response.body)
+    elsif retries > 0
+      sleep(0.1)
+      fetch_user(token, retries - 1)
+    else
+      raise UnableToFetchUserError
+    end
   end
 
   def decrypt_store(env)
