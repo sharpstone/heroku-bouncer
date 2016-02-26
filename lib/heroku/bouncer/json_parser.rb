@@ -8,7 +8,7 @@ Heroku::Bouncer::JsonParser = begin
   lambda do |json|
     begin
       Oj.load(json, :mode => :strict)
-    rescue
+    rescue Oj::ParseError
       raise ::Heroku::Bouncer::JsonParserError
     end
   end
@@ -21,7 +21,7 @@ rescue LoadError
     lambda do |json|
       begin
         Yajl::Parser.parse(json)
-      rescue
+      rescue Yajl::ParseError
         raise ::Heroku::Bouncer::JsonParserError
       end
     end
@@ -34,7 +34,7 @@ rescue LoadError
       lambda do |json|
         begin
           MultiJson.decode(json)
-        rescue
+        rescue MultiJson::ParseError
           raise ::Heroku::Bouncer::JsonParserError
         end
       end
@@ -45,7 +45,7 @@ rescue LoadError
       lambda do |json|
         begin
           JSON.parse(json)
-        rescue
+        rescue JSON::ParserError
           raise ::Heroku::Bouncer::JsonParserError
         end
       end
