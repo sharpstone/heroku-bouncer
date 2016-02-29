@@ -1,3 +1,7 @@
+# 0.7.1
+
+* #48: Address potential errors when making API call
+
 # 0.7.0
 
 * #46: expose refresh token when exposing access token
