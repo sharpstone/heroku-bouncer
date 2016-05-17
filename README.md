@@ -16,7 +16,7 @@ Sinatra app that uses heroku-bouncer.
 1. Install the Heroku OAuth CLI plugin.
 
     ```sh
-    heroku plugins:install git://github.com/heroku/heroku-oauth.git
+    heroku plugins:install heroku-cli-oauth
     ```
 
 2. Create your OAuth client using `/auth/heroku/callback` as your
