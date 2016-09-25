@@ -24,9 +24,11 @@ Sinatra app that uses heroku-bouncer.
    for local development with Foreman.
 
     ```sh
-    heroku clients:register localhost http://localhost:5000/auth/heroku/callback
-    heroku clients:register myapp https://myapp.herokuapp.com/auth/heroku/callback
+    heroku clients:create localhost http://localhost:5000/auth/heroku/callback
+    heroku clients:create myapp https://myapp.herokuapp.com/auth/heroku/callback
     ```
+    
+    See https://github.com/heroku/heroku-cli-oauth#clients for more details.
 
 3. Configure the middleware as follows:
 
