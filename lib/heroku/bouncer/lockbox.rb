@@ -8,7 +8,7 @@ class Heroku::Bouncer::Lockbox < BasicObject
 
   def lock(str)
     aes = ::OpenSSL::Cipher::Cipher.new('aes-256-cbc').encrypt
-    aes.key = ::Base64.decode64(@key)
+    aes.key = @key.size > 32 ? @key[0..31] : @key
     iv = ::OpenSSL::Random.random_bytes(aes.iv_len)
     aes.iv = iv
     [iv + (aes.update(str) << aes.final)].pack('m0')
@@ -22,7 +22,7 @@ class Heroku::Bouncer::Lockbox < BasicObject
   def unlock(str)
     str = str.unpack('m0').first
     aes = ::OpenSSL::Cipher::Cipher.new('aes-256-cbc').decrypt
-    aes.key = ::Base64.decode64(@key)
+    aes.key = @key.size > 32 ? @key[0..31] : @key
     iv = str[0, aes.iv_len]
     aes.iv = iv
     crypted_text = str[aes.iv_len..-1]

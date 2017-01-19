@@ -26,7 +26,7 @@ class MiniTest::Spec
     bouncer_config = default_bouncer_config
     bouncer_config.merge!(bouncer_config_block.call) if bouncer_config_block
     Sinatra.new do
-      use Rack::Session::Cookie, domain: MiniTest::Spec.app_host, secret: 'PTvbkXopkFHsRbphEqoi2pwqOFBGsfO7kVtZJ9XgEtQ='
+      use Rack::Session::Cookie, domain: MiniTest::Spec.app_host, secret: 'cde0e7ee63e9cb2edd04d8284961b28a6b6f6521f05d2094633dfbd00519fabaafae3b6ba3e92d9fe0770ea5a4f9a9e6be597cdcafbcfba12ea12b25508861fd'
       use Heroku::Bouncer, bouncer_config
       get '/:whatever' do
         params['whatever'] || 'root'
@@ -37,7 +37,7 @@ class MiniTest::Spec
   def default_bouncer_config
     {
       oauth: { id: '46307a2b-0397-4739-b2b7-2f67d1cff597', secret: '46307a2b-0397-4739-b2b7-2f67d1cff597' },
-      secret: 'PTvbkXopkFHsRbphEqoi2pwqOFBGsfO7kVtZJ9XgEtQ='
+      secret: 'cde0e7ee63e9cb2edd04d8284961b28a6b6f6521f05d2094633dfbd00519fabaafae3b6ba3e92d9fe0770ea5a4f9a9e6be597cdcafbcfba12ea12b25508861fd'
     }
   end
 
