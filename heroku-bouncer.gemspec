@@ -27,9 +27,9 @@ Gem::Specification.new do |s|
   s.license = 'MIT'
 
   s.add_runtime_dependency("omniauth-heroku", "~> 0.1")
-  s.add_runtime_dependency("sinatra", "~> 1.0")
+  s.add_runtime_dependency("sinatra", ">= 1.0", "< 3")
   s.add_runtime_dependency("faraday", "~> 0.8")
-  s.add_runtime_dependency("rack", "~> 1.0")
+  s.add_runtime_dependency("rack", ">= 1.0", "< 3")
 
   s.add_development_dependency("rake", "~> 10.0")
   s.add_development_dependency("minitest", "~> 5.0")
