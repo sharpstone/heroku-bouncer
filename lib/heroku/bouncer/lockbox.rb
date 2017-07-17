@@ -7,7 +7,7 @@ class Heroku::Bouncer::Lockbox < BasicObject
   end
 
   def lock(str)
-    aes = ::OpenSSL::Cipher::Cipher.new('aes-256-cbc').encrypt
+    aes = cipher.encrypt
     aes.key = @key.size > 32 ? @key[0..31] : @key
     iv = ::OpenSSL::Random.random_bytes(aes.iv_len)
     aes.iv = iv
@@ -21,7 +21,7 @@ class Heroku::Bouncer::Lockbox < BasicObject
   # decrypt is too short to possibly be good aes data.
   def unlock(str)
     str = str.unpack('m0').first
-    aes = ::OpenSSL::Cipher::Cipher.new('aes-256-cbc').decrypt
+    aes = cipher.decrypt
     aes.key = @key.size > 32 ? @key[0..31] : @key
     iv = str[0, aes.iv_len]
     aes.iv = iv
@@ -33,6 +33,18 @@ class Heroku::Bouncer::Lockbox < BasicObject
   end
 
 private
+
+  def cipher
+    if ruby_two_point_four_or_above?
+      ::OpenSSL::Cipher.new('aes-256-cbc')
+    else
+      ::OpenSSL::Cipher::Cipher.new('aes-256-cbc')
+    end
+  end
+
+  def ruby_two_point_four_or_above?
+    ::RUBY_VERSION.to_f >= 2.4
+  end
 
   def self.generate_hmac(data, key)
     ::OpenSSL::HMAC.hexdigest(::OpenSSL::Digest::SHA1.new, key, data)
