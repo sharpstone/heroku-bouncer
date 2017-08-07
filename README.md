@@ -6,6 +6,14 @@
 Heroku Bouncer is a Rack middleware (implemented in Sinatra) that
 requires Heroku OAuth on all requests.
 
+## Ruby and Rack compatibility
+
+* **Ruby**: Versions >= 0.8.0 require Ruby >= 2.2. If you need a version
+  that works with prior versions of Ruby, please use version `~> 0.7.1`.
+  Note, however, that 0.7.1 does not support Rack 2 (Rails 5).
+
+* **Rack**: Rack 1 and 2 are supported.
+
 ## Demo
 
 [heroku-bouncer-demo](https://github.com/schneems/heroku-bouncer-demo) is a
@@ -27,7 +35,7 @@ Sinatra app that uses heroku-bouncer.
     heroku clients:create localhost http://localhost:5000/auth/heroku/callback
     heroku clients:create myapp https://myapp.herokuapp.com/auth/heroku/callback
     ```
-    
+
     See https://github.com/heroku/heroku-cli-oauth#clients for more details.
 
 3. Configure the middleware as follows:
@@ -100,8 +108,8 @@ Here are the supported options you can pass to the middleware:
 * `allow_if`: A lambda that takes an email address. If the lambda evaluates to
   true, allow the user through. If false, redirects to `redirect_url`.
   By default, all users are allowed through after authenticating.
-* `allow_if_user`: A lambda that takes the 
-  [account resource](https://devcenter.heroku.com/articles/platform-api-reference#account) 
+* `allow_if_user`: A lambda that takes the
+  [account resource](https://devcenter.heroku.com/articles/platform-api-reference#account)
   representing the user. If the lambda evaluates to true, allow the user
   through. If false, redirects to `redirect_url`. By default, all users are
   allowed through after authenticating.

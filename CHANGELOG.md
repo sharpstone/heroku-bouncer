@@ -1,3 +1,8 @@
+# 0.8.0
+
+* #55: Ruby >= 2.4 support and Ruby <2.2 deprecation. Thanks @maxbeizer!
+* #52: Rack 2 / Rails 5 support. Thanks @jkutner!
+
 # 0.7.1
 
 * #48: Address potential errors when making API call
