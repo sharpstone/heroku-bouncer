@@ -35,6 +35,8 @@ class Heroku::Bouncer::Lockbox < BasicObject
 private
 
   def cipher
+    # OpenSSL::Cipher::Cipher is deprecated for Ruby >= 2.4
+    # https://ruby.github.io/openssl/OpenSSL/Cipher/Cipher.html
     if ruby_two_point_four_or_above?
       ::OpenSSL::Cipher.new('aes-256-cbc')
     else
