@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = %q{heroku-bouncer}
-  s.version = "0.8.0"
+  s.version = "0.8.1"
 
   s.authors = ["Jonathan Dance"]
   s.email = ["jd@heroku.com"]
@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.license = 'MIT'
   s.required_ruby_version = ">= 2.2"
 
-  s.add_runtime_dependency("omniauth-heroku", "~> 0.1")
+  s.add_runtime_dependency("omniauth-heroku", "~> 0.3")
   s.add_runtime_dependency("sinatra", ">= 1.0", "< 3")
   s.add_runtime_dependency("faraday", "~> 0.8")
   s.add_runtime_dependency("rack", ">= 1.0", "< 3")
