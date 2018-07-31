@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/heroku/heroku-bouncer.png)](https://travis-ci.org/heroku/heroku-bouncer)
-[![Dependency Status](https://gemnasium.com/heroku/heroku-bouncer.png)](https://gemnasium.com/heroku/heroku-bouncer)
 
 # Heroku Bouncer
 
@@ -161,13 +160,13 @@ You can access this in Sinatra and Rails by  `request.env[key]`, e.g.
 
 ## Using the Heroku API
 
-If you set `expose_token` to `true`, you'll get an API token that you
+If you set `expose_token` to `true`, you'll get an OAuth token that you
 can use to make Heroku API calls on behalf of the logged-in user using
-[heroku.rb][] .
+the [platform API][platform-api].
 
 ```ruby
-heroku = Heroku::API.new(:api_key => request.env["bouncer.token"])
-apps = heroku.get_apps.body
+heroku = PlatformAPI.connect_oauth(request.env["bouncer.token"])
+info = heroku.app.info('sushi')
 ```
 
 Keep in mind that this adds substantial security risk to your
@@ -209,4 +208,4 @@ actions that modify data are also recommended.
 [Rack::Builder]: http://rack.rubyforge.org/doc/Rack/Builder.html
 [inheritance]: https://gist.github.com/wuputah/5534428
 [OAuth scope]: https://devcenter.heroku.com/articles/oauth#scopes
-[heroku.rb]: https://github.com/heroku/heroku.rb
+[platform-api]: https://github.com/heroku/platform-api
