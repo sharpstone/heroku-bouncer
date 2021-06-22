@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/heroku/heroku-bouncer.png)](https://travis-ci.org/heroku/heroku-bouncer)
+[![Build Status](https://github.com/sharpstone/heroku-bouncer/actions/workflows/ci.yml/badge.svg)](https://github.com/sharpstone/heroku-bouncer/actions)
 
 # Heroku Bouncer
 
@@ -22,7 +22,7 @@ Sinatra app that uses heroku-bouncer.
 
 1. Install the Heroku OAuth CLI plugin.
 
-    ```sh
+    ```console
     heroku plugins:install heroku-cli-oauth
     ```
 
@@ -30,7 +30,7 @@ Sinatra app that uses heroku-bouncer.
    callback endpoint. Use `http://localhost:5000/auth/heroku/callback`
    for local development with Foreman.
 
-    ```sh
+    ```console
     heroku clients:create localhost http://localhost:5000/auth/heroku/callback
     heroku clients:create myapp https://myapp.herokuapp.com/auth/heroku/callback
     ```
