@@ -1,1 +1,14 @@
+# Ignore all logfiles and tempfiles
+/log/
+/tmp/
+/tags
+
+# Package and dependency caches
+/.bundle
 /Gemfile.lock
+/pkg/
+
+# Generated documentation
+/doc/
+/.yardoc
+/_yardoc/
