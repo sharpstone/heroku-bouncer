@@ -7,9 +7,9 @@ requires Heroku OAuth on all requests.
 
 ## Ruby and Rack compatibility
 
-* **Ruby**: Versions >= 0.8.0 require Ruby >= 2.2. If you need a version
-  that works with prior versions of Ruby, please use version `~> 0.7.1`.
-  Note, however, that 0.7.1 does not support Rack 2 (Rails 5).
+* **Ruby**: Versions `>= 0.8.0` require Ruby >= 2.2.
+  If you need a version that works with prior versions of Ruby, please use version `~> 0.7.1`.
+  Note, however, that `0.7.1` does not support Rack 2 (Rails 5+).
 
 * **Rack**: Rack 1 and 2 are supported.
 
