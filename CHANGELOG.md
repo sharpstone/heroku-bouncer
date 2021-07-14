@@ -1,3 +1,9 @@
+# Unreleased
+
+* #68: Loosen `omniauth-heroku` constraint, allowing `>= 0.1, < 2`, 
+  enabling support of OmniAuth 2. @stevenharman
+* #66: Loosen Faraday constraints, allowing `>= 0.8", < 2`. @stevenharman
+
 # 0.8.0
 
 * #55: Ruby >= 2.4 support and Ruby <2.2 deprecation. Thanks @maxbeizer!
