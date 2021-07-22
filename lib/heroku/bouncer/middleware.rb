@@ -20,6 +20,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
       # super is not called; we're not using sinatra if we're disabled
     else
       super(app)
+      @disabled = false
       @cookie_secret = extract_option(options, :secret, SecureRandom.hex(64))
       @allow_if_user = extract_option(options, :allow_if_user, nil)
       @redirect_url = extract_option(options, :redirect_url, 'https://www.heroku.com')
