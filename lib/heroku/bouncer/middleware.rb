@@ -6,9 +6,11 @@ require 'heroku/bouncer/json_parser'
 require 'heroku/bouncer/decrypted_hash'
 
 class Heroku::Bouncer::Middleware < Sinatra::Base
-
   DecryptedHash = ::Heroku::Bouncer::DecryptedHash
   UnableToFetchUserError = Class.new(RuntimeError)
+
+  DEFAULT_LOGIN_PATH = "/auth/login".freeze
+  private_constant :DEFAULT_LOGIN_PATH
 
   enable :raise_errors
   disable :show_exceptions
@@ -23,6 +25,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
       @disabled = false
       @cookie_secret = extract_option(options, :secret, SecureRandom.hex(64))
       @allow_if_user = extract_option(options, :allow_if_user, nil)
+      @login_path = extract_option(options, :login_path, DEFAULT_LOGIN_PATH)
       @redirect_url = extract_option(options, :redirect_url, 'https://www.heroku.com')
 
       # backwards-compatibilty for `herokai_only`:
@@ -126,7 +129,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     auth_url = ENV["HEROKU_AUTH_URL"] || "https://id.heroku.com"
     logout_url = "#{auth_url}/logout"
 
-    # id.heroku.com whitelists this return_to param, as any auth provider should do
+    # id.heroku.com allowlists this return_to param, as any auth provider should do
     logout_url += "?url=#{params['return_to']}" if params['return_to']
 
     redirect to(logout_url)
@@ -139,14 +142,23 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
   end
 
   # login, setting the URL to return to
-  get '/auth/login' do
+  get DEFAULT_LOGIN_PATH do
     if params['return_to'] && params['return_to'].length <= 255
       store_write(:return_to, params['return_to'])
     end
-    redirect to('/auth/heroku')
+
+    if custom_login_path?
+      redirect to(login_path)
+    else
+      erb(:login, locals: {
+        authenticity_token: request.env["rack.session"]["csrf"]
+      })
+    end
   end
 
 private
+
+  attr_reader :login_path
 
   def unlock_session_data(env, &block)
     decrypt_store(env)
@@ -155,8 +167,20 @@ private
     encrypt_store(env)
   end
 
+  def auth_paths
+    @auth_paths ||= [
+      "/auth/heroku/callback",
+      "/auth/heroku",
+      "/auth/failure",
+      "/auth/sso-logout",
+      "/auth/logout",
+      DEFAULT_LOGIN_PATH,
+      login_path
+    ].compact.freeze
+  end
+
   def auth_request?
-    %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout /auth/login].include?(request.path_info)
+    auth_paths.include?(request.path_info)
   end
 
   def session_nonce_mismatch?
@@ -176,13 +200,17 @@ private
     ts.nil? || Time.now.to_i > ts
   end
 
+  def custom_login_path?
+    login_path != DEFAULT_LOGIN_PATH
+  end
+
   def skip?(env)
     @skip && @skip.call(env)
   end
 
   def require_authentication
     store_write(:return_to, request.url)
-    redirect to('/auth/heroku')
+    redirect to(login_path)
   end
 
   def extract_option(options, option, default = nil)
@@ -258,5 +286,4 @@ private
     return_to.port = port unless port == 80
     return_to.to_s
   end
-
 end

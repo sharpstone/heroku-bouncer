@@ -1,5 +1,6 @@
 require 'heroku/bouncer/middleware'
 require 'rack/builder'
+require 'rack/protection'
 require 'omniauth-heroku'
 
 class Heroku::Bouncer::Builder
@@ -8,6 +9,7 @@ class Heroku::Bouncer::Builder
     builder = Rack::Builder.new
     id, secret, scope = extract_options!(options)
     unless options[:disabled]
+      builder.use Rack::Protection
       builder.use OmniAuth::Builder do
         provider :heroku, id, secret, :scope => scope
       end

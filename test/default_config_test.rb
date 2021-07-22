@@ -14,10 +14,10 @@ describe Heroku::Bouncer do
     end
 
     context "on any request not related with authentication" do
-      it "requires authentication via /auth/heroku, which gets managed by omniauth-heroku" do
+      it "requires authentication via /auth/login, which gets managed by omniauth-heroku" do
         get '/hi'
         assert 302, last_response.status
-        assert_equal "http://#{app_host}/auth/heroku", last_response.location
+        assert_equal "http://#{app_host}/auth/login", last_response.location
       end
 
       context "after a successful OAuth dance" do
@@ -46,11 +46,9 @@ describe Heroku::Bouncer do
 
           # requires authentication
           get '/hi'
-          assert 302, last_response.status
-          assert_equal "http://#{app_host}/auth/heroku", last_response.location
-
           follow_successful_oauth!
           assert_redirected_to_path('/hi')
+
           follow_redirect!
           assert_equal 'hi', last_response.body
         end
@@ -63,7 +61,7 @@ describe Heroku::Bouncer do
         it "redirects to /auth/heroku and after a successful authentication comes back to the given 'return_to'" do
           @return_to = 'http://example.org/foo'
           get '/auth/login', 'return_to' => @return_to
-          follow_successful_oauth!
+          submit_successful_oauth!
           assert_equal @return_to, last_response.location
         end
       end
@@ -72,7 +70,7 @@ describe Heroku::Bouncer do
         it "'return_to' gets ignored and the user gets redirected to the root path" do
           @return_to = 'http://google.com/foo'
           get '/auth/login', 'return_to' => @return_to
-          follow_successful_oauth!
+          submit_successful_oauth!
           assert_equal 'http://example.org/foo', last_response.location
         end
       end
@@ -81,7 +79,7 @@ describe Heroku::Bouncer do
         it "'return_to' gets ignored and the user gets redirected to the root path" do
           @return_to = 'http://example.org/' + ('f' * 255)
           get '/auth/login', 'return_to' => @return_to
-          follow_successful_oauth!
+          submit_successful_oauth!
           assert_equal 'http://example.org/', last_response.location
         end
       end
@@ -89,7 +87,7 @@ describe Heroku::Bouncer do
       context "when there is no 'return_to'" do
         it "redirects to the root path" do
           get '/auth/login'
-          follow_successful_oauth!
+          submit_successful_oauth!
           assert_equal 'http://example.org/', last_response.location
         end
       end
