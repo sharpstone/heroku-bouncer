@@ -1,6 +1,6 @@
-# Unreleased
+# 0.9.0
 
-* #68: Loosen `omniauth-heroku` constraint, allowing `>= 0.1, < 2`, 
+* #68: Loosen `omniauth-heroku` constraint, allowing `>= 0.1, < 2`,
   enabling support of OmniAuth 2. This also adds the new [`:login_path`
   option](README#prompt-to-login). @stevenharman
 * #66: Loosen Faraday constraints, allowing `>= 0.8", < 2`. @stevenharman
