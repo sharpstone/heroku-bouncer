@@ -9,6 +9,7 @@ require 'minitest/spec'
 require 'minitest-spec-context'
 require 'rack/test'
 require 'mocha/setup'
+require 'nokogiri'
 require 'delorean'
 
 # seed the environment
@@ -54,17 +55,26 @@ class MiniTest::Spec
   end
 
   def follow_successful_oauth!(fetched_user_info = {})
-    # /auth/heroku (OAuth dance starts)
-    OmniAuth.config.mock_auth[:heroku] = OmniAuth::AuthHash.new(provider: 'heroku', credentials: {token:'12345', refresh_token:'67890'})
-    assert_equal "http://#{app_host}/auth/heroku", last_response.location, "The user didn't trigger the OmniAuth authentication"
+    assert_equal "http://#{app_host}/auth/login", last_response.location, "The user didn't trigger the OmniAuth authentication"
+
     follow_redirect!
+
+    submit_successful_oauth!(fetched_user_info)
+  end
+
+  def submit_successful_oauth!(fetched_user_info = {})
+    OmniAuth.config.mock_auth[:heroku] = OmniAuth::AuthHash.new(provider: "heroku", credentials: {token: "12345", refresh_token: "67890"})
+    auth_details = extract_auth_details(last_response.body)
+
+    # /auth/heroku (OAuth dance starts)
+    post(auth_details.url, {authenticity_token: auth_details.token})
 
     # stub the user info that will be fetched from Heroku's API with the token returned with the authentication
     fetched_user_info = default_fetched_user_info.merge!(fetched_user_info)
     Heroku::Bouncer::Middleware.any_instance.stubs(:fetch_user).returns(fetched_user_info)
 
     # /auth/callback (OAuth dance finishes)
-    assert last_response.location.include?('/auth/heroku/callback'), "The authentication didn't trigger the callback"
+    assert last_response.location.include?("/auth/heroku/callback"), "The authentication didn't trigger the callback"
     assert 302, last_response.status
     follow_redirect!
   end
@@ -79,7 +89,25 @@ class MiniTest::Spec
   end
 
   def assert_requires_authentication
-    assert_equal "http://#{app_host}/auth/heroku", last_response.location, "Authentication expected, wasn't required"
+    assert_equal "http://#{app_host}/auth/login", last_response.location, "Authentication expected, wasn't required"
   end
 
+  private
+
+  def extract_auth_details(raw_html)
+    document = Nokogiri::HTML.parse(raw_html)
+    form = document.at_css("form")
+    refute_nil document, "Login form not found in response"
+
+    auth_url = form[:action] || ""
+    refute_empty auth_url, "Authentication URL not found in form action"
+
+    input = form.at_css("[name=authenticity_token]")
+    refute_nil input, "Authenticity Token input not found in form"
+
+    token = input[:value] || ""
+    refute_empty token, "Authenticity Token value not present in form"
+
+    OpenStruct.new(url: auth_url, token: token)
+  end
 end

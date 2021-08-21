@@ -112,8 +112,8 @@ Here are the supported options you can pass to the middleware:
   representing the user. If the lambda evaluates to true, allow the user
   through. If false, redirects to `redirect_url`. By default, all users are
   allowed through after authenticating.
-* `redirect_url`: Where unauthorized users are redirected to. Defaults to
-  `www.heroku.com`.
+* `login_path`: Where unauthorized users are redirected so they can be [prompted to login](#prompt-to-login). Defaults to `heroku-bouncer`'s own `/auth/login` path.
+* `redirect_url`: Where unauthorized users are redirected during the OAuth callback phase. Defaults to `www.heroku.com`.
 * `expose_token`: Expose the OAuth token in the session, allowing you to
   make API calls as the user. Default: `false`
 * `expose_email`: Expose the user's email address in the session.
@@ -137,12 +137,34 @@ Here are the supported options you can pass to the middleware:
 
 You use these by passing a hash to the `use` call, for example:
 
-
 ```ruby
 use Heroku::Bouncer,
   oauth: { id: "...", secret: "...", scope: "global" },
   secret: "...",
   expose_token: true
+```
+
+### Prompt to Login
+
+To mitigate Cross-Site Request Forgery attacks, [OmniAuth no longer allows `GET` requests to the `/auth/heroku`](https://github.com/omniauth/omniauth/wiki/Upgrading-to-2.0) path.
+To support this, `heroku-bouncer` no longer redirects unauthorized requests to the `/auth/heroku` path.
+Instead users are redirected to `/auth/login` where a simple HTML template is rendered, prompting the user to authenticate with Heroku.
+
+The template includes a `<form>` with a button which will `POST` to the `/auth/heroku` path.
+It also includes the Authenticity Token from `Rack::Protection`.
+The view provides no styling; it is the most basic example of what's required.
+
+To render your own prompt UI, provide the `:login_path` option.
+Unauthenticated users will be redirected to this path, allowing you to control the UI.
+The resulting page should render an HTML `<form>` which will `POST` to the `/auth/heroku` path.
+The form needs to include a field named `authenticity_token` with the token from `Rack::Protection`.
+
+An example to get you started:
+
+```erb
+<form method="post" action="/auth/heroku">
+  <input type="hidden" name="authenticity_token" value="<%= request.env["rack.session"]["csrf"] %>">
+<button type="submit">Sign in via Heroku</button>
 ```
 
 ## How to get the data

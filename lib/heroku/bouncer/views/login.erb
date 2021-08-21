@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Login with Heroku</title>
+    <%# Avoid extra requests for favicon.ico %>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  </head>
+  <body class="heroku_bouncer">
+    <form method="post" action="/auth/heroku" class="heroku_bouncer-login_form">
+      <input type="hidden" name="authenticity_token" value="<%= authenticity_token %>">
+      <button type="submit">Login with Heroku</button>
+    </form>
+  </body>
+</html>
