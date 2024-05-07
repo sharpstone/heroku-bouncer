@@ -1,6 +1,6 @@
 # Unreleased
 
-* #69: Sinatra 3 support
+* #70: Sinatra 3 support
  
 # 0.9.0
 
