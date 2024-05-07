@@ -8,7 +8,7 @@ require 'minitest/autorun'
 require 'minitest/spec'
 require 'minitest-spec-context'
 require 'rack/test'
-require 'mocha/setup'
+require 'mocha/minitest'
 require 'nokogiri'
 require 'delorean'
 
@@ -19,7 +19,7 @@ require_relative '../lib/heroku/bouncer'
 
 OmniAuth.config.test_mode = true
 
-class MiniTest::Spec
+class Minitest::Spec
 
   # Embedding app
 
@@ -27,7 +27,7 @@ class MiniTest::Spec
     bouncer_config = default_bouncer_config
     bouncer_config.merge!(bouncer_config_block.call) if bouncer_config_block
     Sinatra.new do
-      use Rack::Session::Cookie, domain: MiniTest::Spec.app_host, secret: 'cde0e7ee63e9cb2edd04d8284961b28a6b6f6521f05d2094633dfbd00519fabaafae3b6ba3e92d9fe0770ea5a4f9a9e6be597cdcafbcfba12ea12b25508861fd'
+      use Rack::Session::Cookie, domain: Minitest::Spec.app_host, secret: 'cde0e7ee63e9cb2edd04d8284961b28a6b6f6521f05d2094633dfbd00519fabaafae3b6ba3e92d9fe0770ea5a4f9a9e6be597cdcafbcfba12ea12b25508861fd'
       use Heroku::Bouncer, bouncer_config
       get '/:whatever' do
         params['whatever'] || 'root'
