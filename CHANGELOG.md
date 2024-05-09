@@ -1,3 +1,7 @@
+# Unreleased
+
+* #70: Sinatra 3 support
+
 # 0.9.0
 
 * #68: Loosen `omniauth-heroku` constraint, allowing `>= 0.1, < 2`,
