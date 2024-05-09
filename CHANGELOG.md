@@ -1,6 +1,6 @@
-# Unreleased
+# 1.0.0
 
-* #70: Sinatra 3 support
+* #71: Ruby >= 3.1 support and Ruby < 3 deprecation, Sinatra >= 3 support.
 
 # 0.9.0
 
