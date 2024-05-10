@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency("omniauth-heroku", [">= 0.1", "< 2"])
   s.add_runtime_dependency("sinatra", ">= 3.0", "< 4")
-  s.add_runtime_dependency("faraday", ">= 0.8", "< 2")
+  s.add_runtime_dependency("faraday", ">= 2.0.1", "< 3")
   s.add_runtime_dependency("rack", ">= 2.0", "< 4")
 
   s.add_development_dependency("rake", ">= 12.3.3")
