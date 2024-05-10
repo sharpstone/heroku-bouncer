@@ -31,7 +31,7 @@ describe Heroku::Bouncer do
     private
 
     def decode_cookie(raw_cookie)
-      unescaped_cookie = CGI.unescape(raw_cookie.split("\n").join)
+      unescaped_cookie = URI::Parser.new.unescape(raw_cookie.split("\n").join)
       Marshal.load(Base64.decode64(unescaped_cookie.split("--").first))
     end
   end
