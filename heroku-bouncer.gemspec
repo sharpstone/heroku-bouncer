@@ -35,7 +35,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("rake", ">= 12.3.3")
   s.add_development_dependency("minitest", "~> 5.0")
   s.add_development_dependency("minitest-spec-context", "~> 0.0")
-  s.add_development_dependency("rack-test", "~> 1.1")
+  s.add_development_dependency("rack-test", ">= 2")
   s.add_development_dependency("mocha", "~> 2.2")
   # We need to allow older Nokogiri b/c newer versions require newer Rubies.
   # Consider bumping this when we drop older Ruby support.
