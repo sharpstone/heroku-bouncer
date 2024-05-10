@@ -7,11 +7,11 @@ requires Heroku OAuth on all requests.
 
 ## Ruby and Rack compatibility
 
-* **Ruby**: Versions `>= 0.8.0` require Ruby >= 2.2.
+* **Ruby**: Versions `>= 0.8.0` require Ruby >= 2.2. Versions `>= 1.0.0` require Ruby >= 3.1.
   If you need a version that works with prior versions of Ruby, please use version `~> 0.7.1`.
   Note, however, that `0.7.1` does not support Rack 2 (Rails 5+).
 
-* **Rack**: Rack 1 and 2 are supported.
+* **Rack**: Versions `< 1.0.0` support Rack 1 and 2. Versions `>= 1.0.0` support Rack 2 and 3.
 
 ## Demo
 
@@ -227,7 +227,8 @@ replay attacks if the data is obtained in its entirety. SSL and session
 timeouts should be used to help mitigate this risk. CSRF tokens for any
 actions that modify data are also recommended.
 
-[Rack::Builder]: http://rack.rubyforge.org/doc/Rack/Builder.html
+## Related Documentation
+
 [inheritance]: https://gist.github.com/wuputah/5534428
 [OAuth scope]: https://devcenter.heroku.com/articles/oauth#scopes
 [platform-api]: https://github.com/heroku/platform-api
