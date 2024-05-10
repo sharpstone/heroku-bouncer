@@ -1,6 +1,6 @@
 # 1.0.0
 
-* #71: Ruby >= 3.1 support and Ruby < 3 deprecation, supports Sinatra >= 3 and drops support for Sinatra 2.
+* #71: Ruby >= 3.1 support and Ruby < 3 deprecation, supports Sinatra >= 3 and drops support for Sinatra 1 and 2.
 
 # 0.9.0
 
