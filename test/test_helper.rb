@@ -10,6 +10,7 @@ require 'minitest/autorun'
 require 'minitest/spec'
 require 'mocha/minitest'
 require 'nokogiri'
+require 'ostruct'
 require 'rack/test'
 
 # seed the environment
