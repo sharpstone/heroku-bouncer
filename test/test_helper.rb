@@ -4,13 +4,13 @@ ENV['RACK_ENV'] = 'test'
 require 'bundler/setup'
 Bundler.require(:default, :test)
 
+require 'delorean'
+require 'minitest-spec-context'
 require 'minitest/autorun'
 require 'minitest/spec'
-require 'minitest-spec-context'
-require 'rack/test'
 require 'mocha/minitest'
 require 'nokogiri'
-require 'delorean'
+require 'rack/test'
 
 # seed the environment
 ENV['HEROKU_AUTH_URL'] = 'https://auth.example.org'
