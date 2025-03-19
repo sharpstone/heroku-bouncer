@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "heroku-bouncer"
-  s.version = "1.0.1"
+  s.version = "1.0.2"
 
   s.authors = ["Jonathan Dance"]
   s.email = ["jd@wuputah.com"]
