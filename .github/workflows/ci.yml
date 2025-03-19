@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: [ 3.1, 3.2, 3.3 ]
+        ruby: [ 3.1, 3.2, 3.4 ]
 
     steps:
     - uses: actions/checkout@v2
@@ -19,6 +19,7 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+        cache-version: 1
 
     - name: Build and test
       run: bundle exec rake test
