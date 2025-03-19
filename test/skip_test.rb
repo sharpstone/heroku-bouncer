@@ -38,10 +38,10 @@ describe Heroku::Bouncer do
         {}
       end
     else
-    def decode_cookie(raw_cookie)
-      unescaped_cookie = URI::Parser.new.unescape(raw_cookie.split("\n").join)
-      Marshal.load(Base64.decode64(unescaped_cookie.split("--").first))
-    end
+      def decode_cookie(raw_cookie)
+        unescaped_cookie = URI::Parser.new.unescape(raw_cookie.split("\n").join)
+        Marshal.load(Base64.decode64(unescaped_cookie.split("--").first))
+      end
     end
   end
 end
