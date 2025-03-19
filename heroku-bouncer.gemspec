@@ -27,16 +27,17 @@ Gem::Specification.new do |s|
   s.license = "MIT"
   s.required_ruby_version = ">= 3.1"
 
-  s.add_runtime_dependency("omniauth-heroku", [">= 0.1", "< 2"])
-  s.add_runtime_dependency("sinatra", ">= 3.0", "< 4")
   s.add_runtime_dependency("faraday", ">= 2.0.1", "< 3")
+  s.add_runtime_dependency("omniauth-heroku", [">= 0.1", "< 2"])
   s.add_runtime_dependency("rack", ">= 2.0", "< 4")
+  s.add_runtime_dependency("sinatra", ">= 3.0", "< 4")
 
-  s.add_development_dependency("rake", "~> 13.2.1")
+  s.add_development_dependency("delorean", "~> 2.1")
   s.add_development_dependency("minitest", "~> 5.0")
   s.add_development_dependency("minitest-spec-context", "~> 0.0")
-  s.add_development_dependency("rack-test", "~> 2")
   s.add_development_dependency("mocha", "~> 2.2")
   s.add_development_dependency("nokogiri", "~> 1.16.4")
-  s.add_development_dependency("delorean", "~> 2.1")
+  s.add_development_dependency("ostruct", "~> 0.6.1")
+  s.add_development_dependency("rack-test", "~> 2")
+  s.add_development_dependency("rake", "~> 13.2.1")
 end
