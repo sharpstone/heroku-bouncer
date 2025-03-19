@@ -1,3 +1,8 @@
+# 1.0.1
+
+* #73: Avoid vendoring gems
+* #75: Add explicit dependency on OpenStruct gem
+
 # 1.0.0
 
 * #71: Ruby >= 3.1 support and Ruby < 3 deprecation, supports Sinatra >= 3 and drops support for Sinatra 1 and 2.
