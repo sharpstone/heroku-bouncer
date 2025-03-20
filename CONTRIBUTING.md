@@ -67,13 +67,17 @@ These steps assume you are an owner of the gem on Rubygems, you can find the ful
 
 ### 1. Prepare for the Release:
 
-First, ensure all the necessary PRs have been merged and the [Changelog](https://github.com/sharpstone/heroku-bouncer/blob/master/CHANGELOG.md) has been updated with a new section that reflects all of the changes in this release.
+First, create a branch for the new release `git checkout -b release/1-x-x` replacing `1-x-x` with the release version.
 
-From the main branch, open the [gemspec file](https://github.com/sharpstone/heroku-bouncer/blob/db91a01c602790b043c96356562dcc72149402f8/heroku-bouncer.gemspec#L3), locate the `spec.version = "..."` line then update the version number accordingly (e.g., from 1.0.0 to 1.1.0). Save the gemspec file.
+Ensure all the necessary PRs have been merged and the [Changelog](https://github.com/sharpstone/heroku-bouncer/blob/master/CHANGELOG.md) has been updated with a new section that reflects all of the changes in this release.
 
-### 2. Create a Git Release:
+Open the [gemspec file](https://github.com/sharpstone/heroku-bouncer/blob/db91a01c602790b043c96356562dcc72149402f8/heroku-bouncer.gemspec#L3), locate the `spec.version = "..."` line (e.g., from 1.0.0 to 1.1.0), then save.
 
 Commit your changes to the repository with `git commit -am "Preparing v1.x.x release"`
+
+Create a PR and have it reviewed and merged.
+
+### 2. Create a Git Release:
 
 Create the release using the Github CLI [interactive release command](https://cli.github.com/manual/gh_release_create):
 
