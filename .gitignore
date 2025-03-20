@@ -16,3 +16,6 @@
 /doc/
 /.yardoc
 /_yardoc/
+
+# Gem package files
+heroku-bouncer-*.gem
