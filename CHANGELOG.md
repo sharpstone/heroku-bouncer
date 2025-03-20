@@ -1,7 +1,15 @@
+# 1.0.3
+
+* #80 Loosen sinatra version constraint, allowing `sinatra >= 3, < 5`. Note: According to [GHSA-hxx2-7vcw-mqr3](https://github.com/advisories/GHSA-hxx2-7vcw-mqr3), all versions prior to Sinatra 4.1.0 are vulnerable to [CVE-2024-21510](https://nvd.nist.gov/vuln/detail/CVE-2024-21510).
+
+# 1.0.2
+
+* #75: Add explicit dependency on OpenStruct gem
+* #73: Avoid vendoring gems
+
 # 1.0.1
 
-* #73: Avoid vendoring gems
-* #75: Add explicit dependency on OpenStruct gem
+* #72: Avoid vendoring gems
 
 # 1.0.0
 
