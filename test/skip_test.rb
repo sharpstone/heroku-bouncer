@@ -30,9 +30,18 @@ describe Heroku::Bouncer do
 
     private
 
-    def decode_cookie(raw_cookie)
-      unescaped_cookie = URI::Parser.new.unescape(raw_cookie.split("\n").join)
-      Marshal.load(Base64.decode64(unescaped_cookie.split("--").first))
+    if defined?(::Rack::Session::Encryptor)
+      def decode_cookie(raw_cookie)
+        @encryptor ||= Rack::Session::Encryptor.new(default_bouncer_config.fetch(:secret))
+        @encryptor.decrypt(raw_cookie)
+      rescue Rack::Session::Encryptor::InvalidSignature
+        {}
+      end
+    else
+      def decode_cookie(raw_cookie)
+        unescaped_cookie = URI::Parser.new.unescape(raw_cookie.split("\n").join)
+        Marshal.load(Base64.decode64(unescaped_cookie.split("--").first))
+      end
     end
   end
 end
